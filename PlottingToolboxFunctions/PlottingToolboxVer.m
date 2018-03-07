@@ -12,10 +12,14 @@ function varargout = PlottingToolboxVer
 %
 %   M. Kutzer 27Feb2016, USNA
 
+% Updates
+%   07Mar2018 - Updated to include try/catch for required toolbox
+%               installations
+
 A.Name = 'Plotting Toolbox';
-A.Version = '1.0.0';
+A.Version = '1.0.1';
 A.Release = '(R2015b)';
-A.Date = '27-Feb-2016';
+A.Date = '07-Mar-2018';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);
