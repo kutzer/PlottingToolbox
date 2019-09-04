@@ -6,8 +6,15 @@ function [hg, ptc] = plotCheckerboard(varargin)
 %   hgtransform (hg) object that is the parent of the checkerboard
 %   visualization, and the patch objects of each square (ptcs).
 %
-%   [___] = plotCheckerboard(axs,boardSize,squareSize) allows the user to 
+%   [___] = plotCheckerboard(boardSize,squareSize,squareColors) allows the
+%   user to specify the colors of the squares on the checkerboard as a
+%   2-element cell array. The default value is {'k','w'} (black and white)
+%   matching the convention used by MATLAB's "detectCheckerboardPoints."
+%
+%   [___] = plotCheckerboard(axs,___) allows the user to 
 %   specify the axes or parent of the checkerboard representation.
+%
+%   See also detectCheckerboardPoints
 %
 %   M. Kutzer, USNA, 04Sep2019
 
@@ -45,19 +52,18 @@ p0.Vertices = squareSize * [...
 
 p0 = patch(p0,'Parent',hg,'EdgeColor','k','FaceColor','w');
 
-
 %% Create boxes
 xColor = false;
 x0 = -squareSize;
 y0 = -squareSize;
-for i = 1:boardSize(1)      % boxes in x-direction
+for i = 1:boardSize(2)      % boxes in x-direction
     % Define x-position of box
     x = x0 + (i-1)*squareSize;
     % Define base color for y-index of 1
     xColor = ~xColor;
     % Define xy-color
     xyColor = ~xColor;
-    for j = 1:boardSize(2)  % boxes in y-direction
+    for j = 1:boardSize(1)  % boxes in y-direction
         % Define y-position
         y = y0 + (j-1)*squareSize;
         % Update xy-color
