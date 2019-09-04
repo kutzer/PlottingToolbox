@@ -17,7 +17,7 @@ function p = plotCameraFOV(varargin)
 %   M. Kutzer, USNA, 09Nov2018
 
 %% Parse inputs
-nargchk(2,4,nargin);
+narginchk(2,4);
 
 vIDX = 1;
 if ishandle(varargin{1})
