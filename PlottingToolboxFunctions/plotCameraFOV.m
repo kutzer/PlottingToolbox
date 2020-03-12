@@ -16,6 +16,8 @@ function p = plotCameraFOV(varargin)
 %
 %   M. Kutzer, USNA, 09Nov2018
 
+% TODO - accept cameraParams as an input instead of intrinsic matrix A_c2m
+
 %% Parse inputs
 narginchk(2,4);
 
