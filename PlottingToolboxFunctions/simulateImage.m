@@ -112,6 +112,7 @@ for idx = 1:numel(kids)
 end
 
 %% Save and load image
+% TODO - replace print & imread with getframe or equivalent
 i = 0;
 fname = sprintf('tempSimImage%d.png',i);
 %print(sprintf('-f%f',pFig),'-dpng',fname,sprintf('-r%d',dpi));
