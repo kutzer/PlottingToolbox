@@ -4,12 +4,9 @@ function im = simulateImage(axs,params,H,vpix,hpix,dpi)
 %
 % params - MATLAB camera parameters
 % H - extrinsic matrix relating the global frame of axs to the camera axes
-% vpix - number of vertical pixels
-% hpix - number of horizontal pixels
-% dpi - desired dots per inch (default is 200)
-%
-% Note: The projection matrix must be specified relative to the global
-% coordinate frame.
+% vpix - number of vertical pixels (default is 480)
+% hpix - number of horizontal pixels (default is 640)
+% dpi - desired dots per inch (default is 96)
 %
 % M. Kutzer, 18Feb2016, USNA
 
