@@ -68,8 +68,8 @@ ylim([-vpix,vpix]); % In theory these should be [0,vpix]
 zlim([0,s]);
 
 % Set parameters
-set(fig,'Renderer','OpenGL');
-set(axs,'ZDir','Reverse','XDir','Reverse');
+set(fig,'Renderer','OpenGL','Color',[1 1 1]);
+set(axs,'ZDir','Reverse','XDir','Reverse','Visible','off');
 
 % Setup for saving correct image dimensions
 set(axs,'Units','Normalized','Position',[0,0,1,1]);
