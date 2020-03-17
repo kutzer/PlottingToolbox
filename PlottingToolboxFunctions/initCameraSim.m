@@ -26,7 +26,7 @@ function sim = initCameraSim(varargin)
 %   To capture simulated image from sim, use the following:
 %       frm = getframe(sim.Figure);
 %       im = frm.cdata;
-
+%
 %   M. Kutzer, USNA, 17Mar2020
 
 % TODO - accept cameraParams as an input instead of intrinsic matrix A_c2m
@@ -76,6 +76,7 @@ set(axs,'Units','Normalized','Position',[0,0,1,1]);
 set(fig,'Units','Pixels');
 pos = get(fig,'Position');
 set(fig,'Position',[pos(1:2),hpix,vpix]);
+centerFigure(fig);
 
 % Set up camera parameters
 camproj(axs,'Perspective'); % projection
