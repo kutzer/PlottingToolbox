@@ -16,11 +16,14 @@ function varargout = PlottingToolboxVer
 %   07Mar2018 - Updated to include try/catch for required toolbox
 %               installations
 %   15Mar2018 - Updated to include msgbox warning when download fails
+%   08Jan2020 - Updated to use preview objects instead of camera objects.
+%   17Mar2020 - Updated to include view angle estimation from intrinsic
+%               matrices.
 
 A.Name = 'Plotting Toolbox';
-A.Version = '1.0.2';
-A.Release = '(R2015b)';
-A.Date = '15-Mar-2018';
+A.Version = '1.0.3';
+A.Release = '(R2019b)';
+A.Date = '17-Mar-2020';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);
