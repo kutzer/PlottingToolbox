@@ -46,7 +46,7 @@ if nargin == 2
         error('The specified input is not a valid scalar or valid filename.');
     end
     
-    if exist( filename ) ~= 2
+    if exist(filename,'file') ~= 2
         error('"%s" is not a valid filename.',filename);
     end
     
