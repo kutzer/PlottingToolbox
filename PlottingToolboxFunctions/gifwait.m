@@ -40,7 +40,8 @@ if nargin == 2
         else
             error('The specified input must be between 0 and 4.');
         end
-        filename = fullfile('gifwait_data',sprintf('gifwait_wait%02d.gif',i));
+        %filename = fullfile('gifwait_data',sprintf('gifwait_wait%02d.gif',i));
+        filename = sprintf('gifwait_wait%02d.gif',i);
     else
         error('The specified input is not a valid scalar or valid filename.');
     end
