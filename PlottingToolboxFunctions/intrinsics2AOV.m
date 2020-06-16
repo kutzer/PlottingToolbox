@@ -17,6 +17,9 @@ function varargout = intrinsics2AOV(varargin)
 %
 %   M. Kutzer, USNA, 17Mar2020
 
+% Updates
+%   16Jun2020 - corrected horizontal & vertical AOV estiamtes.
+
 % TODO - accept cameraParams as an input instead of intrinsic matrix A_c2m
 
 %% Parse inputs
@@ -57,12 +60,14 @@ X_c0 = X_c - repmat( mean(X_c,2), 1, size(X_c,2) );
 
 %% Estimate angle of view
 if nargout > 0
-    hAOV = atan2d(max(X_c0(1,:)),s) - atan2d(min(X_c0(1,:)),s);
+    %hAOV = atan2d(max(X_c0(1,:)),s) - atan2d(min(X_c0(1,:)),s);
+    hAOV = atan2d(max(X_c0(2,:)),s) - atan2d(min(X_c0(2,:)),s); % Corrected
     varargout{1} = hAOV;
 end
 
 if nargout > 1
-    vAOV = atan2d(max(X_c0(2,:)),s) - atan2d(min(X_c0(2,:)),s);
+    %vAOV = atan2d(max(X_c0(2,:)),s) - atan2d(min(X_c0(2,:)),s);
+    vAOV = atan2d(max(X_c0(1,:)),s) - atan2d(min(X_c0(1,:)),s); % Corrected
     varargout{2} = vAOV;
 end
 
