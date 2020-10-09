@@ -8,7 +8,8 @@ function sim = initCameraSim(varargin)
 %   defined by the principal point contained in A_c2m. 
 %
 %   sim = INITCAMERASIM(A_c2m,res) specifies the camera resolution (res). 
-%   Note that resolution is defined as [column resolution, row resolution]. 
+%   Note that resolution is defined as [column resolution, row resolution]
+%   also known as [image width, image height], e.g. [640,480].
 %
 %   sim = INITCAMERASIM(A_c2m,res,s) the depth of the simulated camera. 
 %
@@ -28,6 +29,9 @@ function sim = initCameraSim(varargin)
 %       im = frm.cdata;
 %
 %   M. Kutzer, USNA, 17Mar2020
+
+% Updates:
+%   08Oct2020 - Added hidden text object containing resolution information
 
 % TODO - accept cameraParams as an input instead of intrinsic matrix A_c2m
 
@@ -66,6 +70,10 @@ hold(axs,'on');
 xlim([-hpix,hpix]); % In theory these should be [0,hpix]
 ylim([-vpix,vpix]); % In theory these should be [0,vpix]
 zlim([0,s]);
+
+% Create hidden resolution text object
+txt = text(axs,0,0,sprintf('[%d,%d]',hpix,vpix),'Visible','off',...
+    'Tag','Simulated Camera FOV, Resolution');
 
 % Set parameters
 set(fig,'Renderer','OpenGL','Color',[1 1 1]);

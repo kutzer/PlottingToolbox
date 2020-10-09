@@ -1,19 +1,25 @@
 function h = addSingleLight(axs)
-% addSingleLight adds a single light object to a specified axes if one
+% ADDSINGLELIGHT adds a single light object to a specified axes if one
 % does not already exist.
-%   addSingleLight adds a single light object to the current axes and
+%   ADDSINGLELIGHT adds a single light object to the current axes and
 %   returns the light handle. If a light object already exists, the light
 %   object handle is returned. If multiple light objects exists, a warning
 %   is given, and excess lights are removed.
 %
-%   addSingleLight(axs) adds a single light object to the axes specified
+%   ADDSINGLELIGHT(axs) adds a single light object to the axes specified
 %   with axs and returns the light handle. If a light object already
 %   exists, the light object handle is returned. If multiple light objects 
 %   exists, a warning is given, and excess lights are removed.
 %
+%   h = ADDSINGLELIGHT(___) returns the light object.
+%
 %   See also light
 %
-%   (c) M. Kutzer 01Dec2014, USNA
+%   M. Kutzer 01Dec2014, USNA
+
+% Updates:
+%   08Oct2020 - Updated documentation, removed (c), and updated to use
+%               contains.
 
 %% Set defaults
 if nargin < 1
@@ -32,7 +38,7 @@ kTypes = get(kids,'Type');
 if iscell(kTypes)
     bin = ~cellfun(@isempty,strfind(kTypes,'light'),'UniformOutput',1);
 else
-    bin = ~isempty(strfind(kTypes,'light'));
+    bin = contains(kTypes,'light');
 end
 
 idx = find(bin);
