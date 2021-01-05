@@ -20,11 +20,12 @@ function varargout = PlottingToolboxVer
 %   17Mar2020 - Updated to include view angle estimation from intrinsic
 %               matrices.
 %   09Oct2020 - Updated to add getFOVSnapshot and updated initCameraSim
+%   05Jan2021 - Updated install function and simulateImage
 
 A.Name = 'Plotting Toolbox';
-A.Version = '1.0.4';
+A.Version = '1.0.5';
 A.Release = '(R2019b)';
-A.Date = '09-Oct-2020';
+A.Date = '05-Jan-2021';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);
