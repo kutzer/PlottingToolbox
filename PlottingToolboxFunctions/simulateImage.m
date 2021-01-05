@@ -1,7 +1,7 @@
 function im = simulateImage(axs,params,H,vpix,hpix,dpi)
 % SIMULATEIMAGE Simulate image of a specified axes handle given a
 % projection matrix.
-%   im = SIMULATEIMAGE(axs,params,H,vpix,hpix,dpi) returns a simulated
+%   im = SIMULATEIMAGE(axs,params,H,vpix,hpix) returns a simulated
 %   image of all objects contained in a specified axes object (axs) using
 %   camera parameters, camera extrinsics, image dimensions (vpix and hpix)
 %   and an optional dots per inch paramter.
@@ -12,13 +12,17 @@ function im = simulateImage(axs,params,H,vpix,hpix,dpi)
 %                camera axes
 %         vpix - number of vertical pixels (default is 480)
 %         hpix - number of horizontal pixels (default is 640)
-%          dpi - desired dots per inch (default is 96)
+%          dpi - [OPTIONAL, Unused] desired dots per inch (default is 96)
 %
 %   Outputs:
 %       im - vpix x hpix RGB image
 %
 % M. Kutzer, 18Feb2016, USNA
 
+% Updates
+%   05Jan2021 - Updated documentation
+%   05Jan2021 - Add light (TODO - allow adjustable light position & color)
+%   05Jan2021 - Faster implementation using getframe
 %% Set defaults
 if nargin < 6
     %dpi = 200;
@@ -34,14 +38,18 @@ if nargin < 4
 end
 
 %% Parse camera parameters
+% TODO - allow the user to specify the intrinsic matrix only
 A_C2M = transpose( params.IntrinsicMatrix );
 H_A2C = H;
 P_A2M = A_C2M*H_A2C(1:3,:);
 
 %% Setup new figure
-pFig = figure('Visible','off');
-pAxs = axes('Parent',pFig);
+pFig = figure('Visible','off','HandleVisibility','off',...
+    'Tag','simulateImage','Name','simulateImage');
+pAxs = axes('Parent',pFig,'Tag','simulateImage');
 
+%{
+% --- OPTION 1 (slow): Setup figure for saving an image -------------------
 % Setup for saving correct image dimensions
 hdims = [hpix/vpix,hpix/hpix];  % dimensions for choosing horizontal figure size
 vdims = [vpix/vpix,vpix/hpix];  % dimensions for choosing vertical figure size
@@ -50,13 +58,26 @@ set(pFig,'Units','normalized','Position',[0,0,min(hdims),min(vdims)]);
 set(pFig,'PaperUnits','Inches','PaperPosition',[0,0,hpix/dpi,vpix/dpi]);
 set(pFig,'InvertHardCopy','off');
 set(pAxs,'Units','normalized','Position',[0,0,1,1]);
+% -------------------------------------------------------------------------
+%}
+
+% --- OPTION 2 (fast): Setup figure for using getframe --------------------
+set(pAxs,'Units','Normalized','Position',[0,0,1,1]);
+set(pFig,'Units','Pixels');
+pos = get(pFig,'Position');
+set(pFig,'Position',[pos(1:2),hpix,vpix]);
+centerFigure(pFig);
+% -------------------------------------------------------------------------
 
 set(pFig,'Color',[1,1,1]);
 set(pAxs,'Visible','Off','yDir','Reverse');
-hold on
-daspect([1,1,1]);
-xlim([0,hpix]);
-ylim([0,vpix]);
+hold(pAxs,'on');
+daspect(pAxs,[1,1,1]);
+xlim(pAxs,[0,hpix]);
+ylim(pAxs,[0,vpix]);
+
+pLgt = addSingleLight(pAxs);
+set(pLgt,'Position',[1,0,1]);
 
 %% Get list of all children
 kids = findall(axs);
@@ -120,6 +141,8 @@ for idx = 1:numel(kids)
     end
 end
 
+%{
+% --- OPTION 1 (slow): Setup figure for saving an image -------------------
 %% Save and load image
 % TODO - replace print & imread with getframe or equivalent
 i = 0;
@@ -128,7 +151,15 @@ fname = sprintf('tempSimImage%d.png',i);
 print(sprintf('-f%f',get(pFig,'Number')),'-dpng',fname,sprintf('-r%d',dpi));
 
 im = imread(fname);
+%delete(fname);
+% -------------------------------------------------------------------------
+%}
+
+% --- OPTION 2 (fast): Setup figure for using getframe --------------------
+im_struct = getframe(pFig);
+im = im_struct.cdata;
+% -------------------------------------------------------------------------
 
 %% Close pFig
 delete(pFig);
-%delete(fname);
+%set(pFig,'Visible','On','HandleVisibility','on');
