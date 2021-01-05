@@ -1,12 +1,21 @@
 function im = simulateImage(axs,params,H,vpix,hpix,dpi)
 % SIMULATEIMAGE Simulate image of a specified axes handle given a
 % projection matrix.
+%   im = SIMULATEIMAGE(axs,params,H,vpix,hpix,dpi) returns a simulated
+%   image of all objects contained in a specified axes object (axs) using
+%   camera parameters, camera extrinsics, image dimensions (vpix and hpix)
+%   and an optional dots per inch paramter.
 %
-% params - MATLAB camera parameters
-% H - extrinsic matrix relating the global frame of axs to the camera axes
-% vpix - number of vertical pixels (default is 480)
-% hpix - number of horizontal pixels (default is 640)
-% dpi - desired dots per inch (default is 96)
+%   Inputs:
+%       params - MATLAB camera parameters
+%            H - extrinsic matrix relating the global frame of axs to the 
+%                camera axes
+%         vpix - number of vertical pixels (default is 480)
+%         hpix - number of horizontal pixels (default is 640)
+%          dpi - desired dots per inch (default is 96)
+%
+%   Outputs:
+%       im - vpix x hpix RGB image
 %
 % M. Kutzer, 18Feb2016, USNA
 
@@ -27,7 +36,7 @@ end
 %% Parse camera parameters
 A_C2M = transpose( params.IntrinsicMatrix );
 H_A2C = H;
-P = A_C2M*H_A2C(1:3,:);
+P_A2M = A_C2M*H_A2C(1:3,:);
 
 %% Setup new figure
 pFig = figure('Visible','off');
@@ -84,7 +93,7 @@ for idx = 1:numel(kids)
                     H = getAbsoluteTransform(kid);
                     % Project points
                     X(4,:) = 1;
-                    sXp = P*H*X;
+                    sXp = P_A2M*H*X;
                     % Account for scaling
                     s = sXp(3,:);
                     Xp = sXp./repmat(s,3,1);
