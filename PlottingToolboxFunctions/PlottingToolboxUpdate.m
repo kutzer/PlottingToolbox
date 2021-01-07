@@ -45,13 +45,15 @@ catch
         % documentation.
         % TODO - Consider an alternative to urlwrite.
         tmpFname = sprintf('%sToolbox-master.zip',toolboxName);
-        urlwrite(url,fullfile(pname,tmpFname));
+        %urlwrite(url,fullfile(pname,tmpFname));
+        websave(fullfile(pname,tmpFname),url);
         fnames = unzip(fullfile(pname,tmpFname),pname);
         delete(fullfile(pname,tmpFname));
         
         fprintf('SUCCESS\n');
         confirm = true;
-    catch
+    catch ME
+        ME
         fprintf('FAILED\n');
         confirm = false;
     end
