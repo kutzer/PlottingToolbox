@@ -67,9 +67,9 @@ axs = axes('Parent',fig,'Tag','Simulated Camera FOV, Axes');
 daspect(axs,[1 1 1]);
 hold(axs,'on');
 % Set axes limits
-xlim([-hpix,hpix]); % In theory these should be [0,hpix]
-ylim([-vpix,vpix]); % In theory these should be [0,vpix]
-zlim([0,s]);
+xlim(axs,[-hpix,hpix]); % In theory these should be [0,hpix]
+ylim(axs,[-vpix,vpix]); % In theory these should be [0,vpix]
+zlim(axs,[0,s]);
 
 % Create hidden resolution text object
 txt = text(axs,0,0,sprintf('[%d,%d]',hpix,vpix),'Visible','off',...
