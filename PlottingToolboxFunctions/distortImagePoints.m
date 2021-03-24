@@ -2,15 +2,20 @@ function Xd = distortImagePoints(Xu,params)
 % DISTORTIMAGEPOINTS calculate distorted image points using the
 % classical lens distortion model.
 %
-%   Xu - undistorted image points
-%       Xu = [xu_1,xu_2,...;
-%             yu_1,yu_2,...];
-%   Xd - distorted image points
-%       Xd = [xd_1,xd_2,...;
-%             yd_1,yd_2,...]; 
-%   Xc - center of distortion
-%   K - 1xN array containing radial distortion coefficients
-%   P - 1xM array containing tangential distortion coefficients
+%   Inputs:
+%           Xu - undistorted image points
+%               Xu = [xu_1,xu_2,...;
+%                     yu_1,yu_2,...];
+%       params - MATLAB camera parameters structured array
+%                Xc - center of distortion
+%                 K - 1xN array containing radial distortion coefficients
+%                 P - 1xM array containing tangential distortion coefficients
+%   Outputs:
+%       Xd - distorted image points
+%           Xd = [xd_1,xd_2,...;
+%                 yd_1,yd_2,...]; 
+%   
+
 %
 % References
 %   [1] https://en.wikipedia.org/wiki/Distortion_(optics)
@@ -19,7 +24,7 @@ function Xd = distortImagePoints(Xu,params)
 %   *NOTE: [2] contains a typo in Eq. 1, (xu,yu) appears to be switched
 %   with (xd,yd)
 %
-%   (c) M. Kutzer 21July2015, USNA
+%   M. Kutzer 21July2015, USNA
 
 % Updates
 %   18Feb2016 - Updated to accept and parse MATLAB camera parameters
