@@ -1,6 +1,6 @@
 function g = gifwait(varargin)
 % GIFWAIT plays a gif while a loop is running.
-%   g = waitgif(i,msg) initializes the figure and gif where "i" specifies
+%   g = GIFWAIT(i,msg) initializes the figure and gif where "i" specifies
 %   the gif of choice
 %       0 - gif is randomly selected from available files
 %       1 - "The Hangover," Alan numbers scene gif
@@ -8,11 +8,11 @@ function g = gifwait(varargin)
 %       3 - "Little Rascals," Spanky waiting gif
 %       4 - "Alice in Wonderland," Alice waiting gif
 %
-%   g = waitgif(filename,msg) initializes the figure and a user specified
+%   g = GIFWAIT(filename,msg) initializes the figure and a user specified
 %   gif. Note that not all gifs are compatible.
 %
-%   g = waitfig(g) updates the gif based on the time that has passed
-%   between calls of gifwait.
+%   g = GIFWAIT(g) updates the gif based on the time that has passed
+%   between calls of GIFWAIT.
 %
 %   Example:
 %       g = gifwait(0,'Please wait...');
@@ -24,6 +24,9 @@ function g = gifwait(varargin)
 %       end
 %
 %   M. Kutzer, 20Mar2020, USNA
+
+% Updates:
+%   01Apr2021 - Updated for new imread syntax (name/value pair)
 
 %% Parse inputs
 narginchk(1,2)
@@ -54,7 +57,11 @@ if nargin == 2
     warning off
     try
         %fprintf('wait%02d.gif\n',i)
-        [im,map] = imread( filename );
+        try
+            [im,map] = imread( filename,'gif','frames','all' );
+        catch
+            [im,map] = imread( filename );
+        end
     catch
         error('"%s" is not compatible with imread.m, please choose another gif',filename);
     end

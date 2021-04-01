@@ -24,9 +24,9 @@ function varargout = PlottingToolboxVer
 %   08Jan2021 - Updated ToolboxUpdate
 
 A.Name = 'Plotting Toolbox';
-A.Version = '1.0.6';
+A.Version = '1.0.7';
 A.Release = '(R2019b)';
-A.Date = '08-Jan-2021';
+A.Date = '01-Apr-2021';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);
