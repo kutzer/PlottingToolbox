@@ -22,11 +22,12 @@ function varargout = PlottingToolboxVer
 %   09Oct2020 - Updated to add getFOVSnapshot and updated initCameraSim
 %   05Jan2021 - Updated install function and simulateImage
 %   08Jan2021 - Updated ToolboxUpdate
+%   26Apr2021 - Updated simualteImage.m
 
 A.Name = 'Plotting Toolbox';
-A.Version = '1.0.7';
+A.Version = '1.0.8';
 A.Release = '(R2019b)';
-A.Date = '01-Apr-2021';
+A.Date = '21-Apr-2021';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);
