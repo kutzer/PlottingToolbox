@@ -1,17 +1,14 @@
-function im = simulateImage(axs,params,H,vpix,hpix,dpi)
+function im = simulateImage(axs,params,H_a2c)
 % SIMULATEIMAGE Simulate image of a specified axes handle given a
 % projection matrix.
-%   im = SIMULATEIMAGE(axs,params,H,vpix,hpix) returns a simulated
-%   image of all objects contained in a specified axes object (axs) using
-%   camera parameters, camera extrinsics, image dimensions (vpix and hpix)
-%   and an optional dots per inch paramter.
+%   im = SIMULATEIMAGE(axs,params,H_c2a,dpi) returns a simulated image of
+%   all objects contained in a specified axes object (axs) using camera
+%   parameters and camera extrinsics.
 %
 %   Inputs:
 %       params - MATLAB camera parameters
-%            H - extrinsic matrix relating the global frame of axs to the 
+%         H_a2c - extrinsic matrix relating the global frame of axs to the 
 %                camera axes
-%         vpix - number of vertical pixels (default is 480)
-%         hpix - number of horizontal pixels (default is 640)
 %          dpi - [OPTIONAL, Unused] desired dots per inch (default is 96)
 %
 %   Outputs:
@@ -23,58 +20,43 @@ function im = simulateImage(axs,params,H,vpix,hpix,dpi)
 %   05Jan2021 - Updated documentation
 %   05Jan2021 - Add light (TODO - allow adjustable light position & color)
 %   05Jan2021 - Faster implementation using getframe
+%   26Apr2021 - Fully leverage camera parameters
+
 %% Set defaults
 if nargin < 6
     %dpi = 200;
     dpi = 96;
 end
-if nargin < 5
-    %hpix = 1280;
-    hpix = 640;
-end
-if nargin < 4
-    %vpix = 1024;
-    vpix = 480;
-end
 
 %% Parse camera parameters
 % TODO - allow the user to specify the intrinsic matrix only
-A_C2M = transpose( params.IntrinsicMatrix );
-H_A2C = H;
-P_A2M = A_C2M*H_A2C(1:3,:);
+% Define image size
+vpix = params.ImageSize(1);
+hpix = params.ImageSize(2);
+% Define intrinsics
+% - Camera frame relative to matrix frame
+A_c2m = transpose( params.IntrinsicMatrix );
+% Define extrinsics
+% - Axes frame relative to camera frame
+% H_a2c
+% Define projection
+P_a2m = A_c2m*H_a2c(1:3,:);
 
 %% Setup new figure
 pFig = figure('Visible','off','HandleVisibility','off',...
     'Tag','simulateImage','Name','simulateImage');
 pAxs = axes('Parent',pFig,'Tag','simulateImage');
 
-%{
-% --- OPTION 1 (slow): Setup figure for saving an image -------------------
-% Setup for saving correct image dimensions
-hdims = [hpix/vpix,hpix/hpix];  % dimensions for choosing horizontal figure size
-vdims = [vpix/vpix,vpix/hpix];  % dimensions for choosing vertical figure size
-
-set(pFig,'Units','normalized','Position',[0,0,min(hdims),min(vdims)]);
-set(pFig,'PaperUnits','Inches','PaperPosition',[0,0,hpix/dpi,vpix/dpi]);
-set(pFig,'InvertHardCopy','off');
-set(pAxs,'Units','normalized','Position',[0,0,1,1]);
-% -------------------------------------------------------------------------
-%}
-
-% --- OPTION 2 (fast): Setup figure for using getframe --------------------
-set(pAxs,'Units','Normalized','Position',[0,0,1,1]);
-set(pFig,'Units','Pixels');
-pos = get(pFig,'Position');
-set(pFig,'Position',[pos(1:2),hpix,vpix]);
+set(pFig,'Units','Pixels','Position',[0,0,hpix,vpix],...
+    'Color',[1,1,1]);
 centerFigure(pFig);
-% -------------------------------------------------------------------------
+set(pAxs,'Units','Normalized','Position',[0,0,1,1],'Visible','Off',...
+    'yDir','Reverse','zDir','Reverse');
 
-set(pFig,'Color',[1,1,1]);
-set(pAxs,'Visible','Off','yDir','Reverse');
 hold(pAxs,'on');
 daspect(pAxs,[1,1,1]);
-xlim(pAxs,[0,hpix]);
-ylim(pAxs,[0,vpix]);
+xlim(pAxs,[0.5,0.5] + [0,hpix]);
+ylim(pAxs,[0.5,0.5] + [0,vpix]);
 
 pLgt = addSingleLight(pAxs);
 set(pLgt,'Position',[1,0,1]);
@@ -111,21 +93,21 @@ for idx = 1:numel(kids)
                         end
                     end
                     % Get absolute transform
-                    H = getAbsoluteTransform(kid);
+                    H_k2a = getAbsoluteTransform(kid);
                     % Project points
                     X(4,:) = 1;
-                    sXp = P_A2M*H*X;
+                    sX_m = P_a2m*H_k2a*X;
                     % Account for scaling
-                    s = sXp(3,:);
-                    Xp = sXp./repmat(s,3,1);
+                    z_c = sX_m(3,:);
+                    X_m = sX_m./repmat(z_c,3,1);
                     % Apply lens distortion
                     % TODO - confirm distortion model
-                    Xp(1:2,:) = distortImagePoints(Xp(1:2,:),params);
+                    X_m(1:2,:) = distortImagePoints(X_m(1:2,:),params);
                     % TODO - address background foreground issues
-                    Xp(3,:) = -s; % This may help
+                    X_m(3,:) = z_c;
                     % Get new data
                     for i = 1:3
-                        xp{i} = reshape(Xp(i,:),dim{i});
+                        xp{i} = reshape(X_m(i,:),dim{i});
                     end
                     % Copy object and update data
                     newkid = copyobj(kid,pAxs);
@@ -141,24 +123,15 @@ for idx = 1:numel(kids)
     end
 end
 
-%{
-% --- OPTION 1 (slow): Setup figure for saving an image -------------------
-%% Save and load image
-% TODO - replace print & imread with getframe or equivalent
-i = 0;
-fname = sprintf('tempSimImage%d.png',i);
-%print(sprintf('-f%f',pFig),'-dpng',fname,sprintf('-r%d',dpi));
-print(sprintf('-f%f',get(pFig,'Number')),'-dpng',fname,sprintf('-r%d',dpi));
-
-im = imread(fname);
-%delete(fname);
-% -------------------------------------------------------------------------
-%}
-
-% --- OPTION 2 (fast): Setup figure for using getframe --------------------
+%% Get the image
 im_struct = getframe(pFig);
 im = im_struct.cdata;
-% -------------------------------------------------------------------------
+% Check if image is correct size and resize as needed
+% - Older versions of MATLAB create an image that is twice the size of the
+%   actual pixel size of the figure when using getframe.m
+if ( size(im,1) ~= vpix ) || ( size(im,2) ~= hpix ) 
+    im = imresize(im,[vpix,hpix]);
+end
 
 %% Close pFig
 delete(pFig);
