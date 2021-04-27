@@ -22,6 +22,8 @@ function im = simulateImage(axs,params,H_a2c)
 %   05Jan2021 - Faster implementation using getframe
 %   26Apr2021 - Fully leverage camera parameters
 
+debugON = true;
+
 %% Set defaults
 if nargin < 6
     %dpi = 200;
@@ -70,23 +72,23 @@ for idx = 1:numel(kids)
             switch lower(get(kid,'Visible'))
                 case 'on'
                     % Get data
-                    x{1} = get(kid,'XData');
-                    x{2} = get(kid,'YData');
-                    x{3} = get(kid,'ZData');
+                    x_k{1} = get(kid,'XData');
+                    x_k{2} = get(kid,'YData');
+                    x_k{3} = get(kid,'ZData');
                     % Get dimensions and reshape data
-                    clear dim X
+                    clear dim X_k
                     for i = 1:3
-                        if ~isempty(x{i})
+                        if ~isempty(x_k{i})
                             % Get data dimensions (assumes all surf data is [i,j])
-                            dim{i} = size(x{i});
+                            dim{i} = size(x_k{i});
                             % Reshape for projection
-                            X(i,:) = reshape(x{i},1,[]);
+                            X_k(i,:) = reshape(x_k{i},1,[]);
                         else
                             % Account for z-direction empty set
                             % TODO - This can be done better
                             if i > 1
                                 dim{i} = dim{1};
-                                X(i,:) = reshape(zeros(dim{1}),1,[]);
+                                X_k(i,:) = reshape(zeros(dim{1}),1,[]);
                             else
                                 % Do nothing and hope the rest populates
                             end
@@ -95,14 +97,14 @@ for idx = 1:numel(kids)
                     % Get absolute transform
                     H_k2a = getAbsoluteTransform(kid);
                     % Project points
-                    X(4,:) = 1;
-                    sX_m = P_a2m*H_k2a*X;
+                    X_k(4,:) = 1;
+                    sX_m = P_a2m*H_k2a*X_k;
                     % Account for scaling
                     z_c = sX_m(3,:);
                     X_m = sX_m./repmat(z_c,3,1);
                     % Apply lens distortion
                     % TODO - confirm distortion model
-                    X_m(1:2,:) = distortImagePoints(X_m(1:2,:),params);
+                    %X_m(1:2,:) = distortImagePoints(X_m(1:2,:),params);
                     % TODO - address background foreground issues
                     X_m(3,:) = z_c;
                     % Get new data
@@ -134,5 +136,11 @@ if ( size(im,1) ~= vpix ) || ( size(im,2) ~= hpix )
 end
 
 %% Close pFig
-delete(pFig);
+if debugON
+    set(pFig,'Visible','on');
+    assignin('base','pFig',pFig);
+    assignin('base','pAxs',pAxs);
+else
+    delete(pFig);
+end
 %set(pFig,'Visible','On','HandleVisibility','on');
