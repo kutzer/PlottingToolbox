@@ -16,14 +16,17 @@ function pShapes = textToPolyshapes(msg,width,height,varargin)
 %           'FontAngle' - {['normal','italic'}
 %
 %   Output(s)
-%       pShapes - 1xN array of polyshapes
+%       pShapes - 1xN array of polyshapes where each element represents an
+%                 individual character (or region for a binary image) 
+%                 sorted left-to-right, top-to-bottom. 
 %
-%   Example
+%   Example(s)
 %       msg = sprintf([...
 %           '0123456789012345678901234567890123456789\n',...
 %           '0123456789012345678901234567890123456789\n',...
 %           '0123456789012345678901234567890123456789']);
-
+%       width = 8*25.4; % 8" text width converted to mm
+%       pShapes = textToPolyshapes(msg,width,[]);
 %
 %   M. Kutzer, 27Aug2021, USNA
 
