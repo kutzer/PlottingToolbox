@@ -9,7 +9,9 @@ msg = sprintf([...
     '0123456789012345678901234567890123456789\n',...
     '0123456789012345678901234567890123456789']);
 width = 8*25.4; % 8" text width converted to mm
-pShapes = textToPolyshapes(msg,width,[]);
+%height = 4*25.4; % 4" text height converted to mm
+height = [];
+pShapes = textToPolyshapes(msg,width,height);
 
 %% Fit splines
 pps = pShapesToSplines(pShapes);
