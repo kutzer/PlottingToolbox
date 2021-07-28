@@ -174,7 +174,7 @@ if isempty(width) && ~isempty(height)
     width = height * aspect;
 elseif ~isempty(width) && isempty(height)
     height = width / aspect;
-else
+elseif isempty(width) && isempty(height)
     width = diff(xxPix);
     height = diff(yyPix);
 end
