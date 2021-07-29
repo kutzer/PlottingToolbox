@@ -8,8 +8,9 @@ msg = sprintf([...
     '0123456789012345678901234567890123456789\n',...
     '0123456789012345678901234567890123456789\n',...
     '0123456789012345678901234567890123456789']);
-width = 8*25.4; % 8" text width converted to mm
+%width = 8*25.4; % 8" text width converted to mm
 %height = 4*25.4; % 4" text height converted to mm
+width = 180;
 height = [];
 pShapes = textToPolyshapes(msg,width,height);
 
@@ -95,7 +96,7 @@ view(axs,3);
 plt = plot3(X(1,:),X(2,:),X(3,:),'Parent',axs);
 
 %% Animate
-for i = 1:size(X,2)
-    set(plt,'XData',X(1,1:i),'YData',X(2,1:i),'ZData',X(3,1:i));
-    drawnow;
-end
+% for i = 1:size(X,2)
+%     set(plt,'XData',X(1,1:i),'YData',X(2,1:i),'ZData',X(3,1:i));
+%     drawnow;
+% end
