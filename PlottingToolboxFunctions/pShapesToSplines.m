@@ -1,16 +1,20 @@
-function [pps,sEnds] = pShapesToSplines(pShapes)
+function [pps,sEnds] = pShapesToSplines(pShapes,cont)
 % PSHAPESTOSPLINES converts polyshape boundaries to a set of splines that
 % are approximetely arc length parameterized using Euclidean distance
 % between adjacent points.
 %   pps = pShapesToSplines(pShapes)
+%   pps = pShapesToSplines(pShapes,cont)
+%   [pps,sEnds] = pShapesToSplines(___)
 %
 %   Input(s)
 %       pShapes - 1xN array of polyshapes
+%       cont - string defining C0 or C1 continuity (default C1)
 %
 %   Output(s)
-%       pps   - 1xM cell array containing 2D cubic splines approximating 
+%       pps   - 1xM cell array containing 2D cubic splines approximating
 %               each boundary
-%       sEnds - 1xM array containing the approximate arc length of each 
+%       sEnds - 1xM array containing the approximate arc length of each
+%
 %   Example(s)
 %       msg = sprintf([...
 %           '0123456789012345678901234567890123456789\n',...
@@ -26,7 +30,15 @@ function [pps,sEnds] = pShapesToSplines(pShapes)
 %
 %   M. Kutzer, 28Jul2021, USNA
 
+% Update(s)
+%   15Dec2021 - Included C0 and C1 continuity option.
+
 plotsON = false;
+
+%% Set default(s)
+if nargin < 2
+    cont = 'C1';
+end
 
 %% Check input(s)
 switch lower( class(pShapes) )
@@ -34,6 +46,16 @@ switch lower( class(pShapes) )
         % Good input
     otherwise
         error('Input must be an array of one or more polyshapes.');
+end
+
+switch lower(cont)
+    case 'c0'
+        % Good
+    case 'c1'
+        % Good'
+    otherwise
+        warning('Continuity must be defined as either C0 or C1. Using default C1 value.');
+        cont = 'C1';
 end
 
 %% Setup debug plot(s)
@@ -51,13 +73,13 @@ end
 n = numel(pShapes);
 for i = 1:n
     pShape = pShapes(i);            % Isolate ith polyshape
-    b = numboundaries( pShape );    % Identify number of boundaries 
+    b = numboundaries( pShape );    % Identify number of boundaries
     
     % Isolate vertices for each boundary
     for j = 1:b
         [x,y] = boundary(pShape,j);
         % Combine terms
-        X = [x,y].'; 
+        X = [x,y].';
         % Approximate vectors
         dXdk = diff(X,1,2);
         % Estimate arc length
@@ -83,10 +105,24 @@ for i = 1:n
         
         % Fit splines
         if (i == 1) && (j == 1)
-            pps = fitpp(s,X,s,dXds);
+            switch lower(cont)
+                case 'c0'
+                    pps = fitpp(s,X);
+                case 'c1'
+                    pps = fitpp(s,X,s,dXds);
+                otherwise
+                    error('Unrecognized continuity definition.');
+            end
             sEnds = s(end);
         else
-            pps(end+1) = fitpp(s,X,s,dXds);
+            switch lower(cont)
+                case 'c0'
+                    pps(end+1) = fitpp(s,X);
+                case 'c1'
+                    pps(end+1) = fitpp(s,X,s,dXds);
+                otherwise
+                    error('Unrecognized continuity definition.');
+            end
             sEnds(end+1) = s(end);
         end
         

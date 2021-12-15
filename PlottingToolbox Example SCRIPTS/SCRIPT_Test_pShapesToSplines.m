@@ -15,16 +15,16 @@ clc
 % pShapes = textToPolyshapes(msg,width,height);
 
 msg = sprintf([...
-    '0']);
+    'Hello Allan']);
 %width = 8*25.4; % 8" text width converted to mm
 %height = 4*25.4; % 4" text height converted to mm
 width = 80;
 height = [];
 pShapes = textToPolyshapes(msg,width,height);
 
-
 %% Fit splines
-pps = pShapesToSplines(pShapes);
+pps = pShapesToSplines(pShapes,'C0');
+%pps = pShapesToSplines(pShapes,'C1');
 
 %% Define path parameters
 speed = 50; % desired linear speed (mm/s)
