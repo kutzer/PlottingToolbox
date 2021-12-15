@@ -25,9 +25,9 @@ function varargout = PlottingToolboxVer
 %   26Apr2021 - Updated simualteImage.m
 
 A.Name = 'Plotting Toolbox';
-A.Version = '1.0.8';
+A.Version = '1.0.9';
 A.Release = '(R2019b)';
-A.Date = '21-Apr-2021';
+A.Date = '15-Dec-2021';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);
