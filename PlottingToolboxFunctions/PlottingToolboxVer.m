@@ -23,6 +23,7 @@ function varargout = PlottingToolboxVer
 %   05Jan2021 - Updated install function and simulateImage
 %   08Jan2021 - Updated ToolboxUpdate
 %   26Apr2021 - Updated simualteImage.m
+%   15Dec2021 - Added C0 and C1 options to pShapesToSplines
 
 A.Name = 'Plotting Toolbox';
 A.Version = '1.0.9';
