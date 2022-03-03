@@ -24,11 +24,12 @@ function varargout = PlottingToolboxVer
 %   08Jan2021 - Updated ToolboxUpdate
 %   26Apr2021 - Updated simualteImage.m
 %   15Dec2021 - Added C0 and C1 options to pShapesToSplines
+%   03Mar2022 - Added appendLine function
 
 A.Name = 'Plotting Toolbox';
-A.Version = '1.0.9';
+A.Version = '1.0.10';
 A.Release = '(R2019b)';
-A.Date = '15-Dec-2021';
+A.Date = '03-Mar-2022';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);
