@@ -1,5 +1,5 @@
 %% SCRIPT_PlotAprilTag
-% This script explores using the images of all tags from all the 
+% This script explores using the images of all tags from all the
 % pre-generated AprilTag 3 families [1] to generate simulated tags.
 %
 % References:
@@ -13,42 +13,95 @@ clc
 
 %% Specify tagFamily, tagID, and tagSize
 tagFamily = 'tag36h11';
-tagID = 3;
-tagSize = 50; % (mm)
+tagID = 2;
+tagSize = 130; % (mm)
 
+% tagFamily = 'tagCustom48h12';
+% tagID = 36;
+% tagSize = 300; % (mm)
 %% Define pathname and filename
 % Pathname (this assumes AprilTags-imgs is cloned in the base GitHub
 % directory)
 pname = fullfile('..\..\apriltag-imgs',tagFamily);
 
 idx = strfind(tagFamily,'h');
-fname = sprintf('%s_%s_%05d.png',...
-    tagFamily(1:(idx-1)),tagFamily((idx+1):end),tagID);
+fname = sprintf('tag%s_%s_%05d.png',...
+    tagFamily((idx-2):(idx-1)),tagFamily((idx+1):end),tagID);
 
 %% Read Apriltag
 im = imread( fullfile(pname,fname) );
 im = rgb2gray(im);
+
 figure; imshow(im);
-% Flip data (not sure if this is necessary)
-% -> Move reference from upper left to lower left 
-im = flipud(im);
-figure; imshow(im);
+set(gca,'Units','Normalized','Position',[0.1,0.1,0.8,0.8],'Visible','on');
+grid on
+
+%% Define tagSize box
+[m,n] = size(im);
+if m ~= n
+    % AprilTag is not square!
+    warning('AprilTag %s, %s is not square [%d,%d].',tagFamily,fname,m,n);
+end
+
+for i = 1:floor(n/2)
+    ringPix = [];
+    % Isolate pixels from ith ring
+    ringPix(:,1) = im(i:(end-(i-1)),i);
+    ringPix(:,2) = im(i:(end-(i-1)),(end-(i-1)));
+    ringPix(:,3) = im(i,i:(end-(i-1))).';
+    ringPix(:,4) = im((end-(i-1)),i:(end-(i-1))).';
+    
+    % Identify mixed/all black/all white rings
+    % Mixed ring (default)
+    ring(i) = -1; % Default (mixed ring)
+    if nnz(ringPix == 0) == numel(ringPix)
+        % All black ring
+        ring(i) = 0;
+    end
+
+    if nnz(ringPix == 255) == numel(ringPix)
+        % All white ring
+        ring(i) = 1;
+    end 
+
+    if i > 1
+        if ring(i-1) == 0 && ring(i) == 1
+            % Black to white
+            iStart = i;
+            iEnd   = n-(i-1);
+            nSize = n-i-1;
+            break
+        end 
+
+        if ring(i-1) == 1 && ring(i) == 0
+            % White to black
+            iStart = i;
+            iEnd   = n-(i-1);
+            nSize = n-i;
+            break
+        end
+    end
+end
 
 %% Define x/y coordinates
-% TODO - figure out if white border is included in scale!
-[m,n] = size(im);
-% x-corner locations
-x = linspace(-tagSize/2,tagSize/2,n+1);
-% y-corner locations
-y = linspace(-tagSize/2,tagSize/2,m+1);
+f = linspace(-tagSize/2,tagSize/2,nSize+1);
+s = (iStart-0.5):(iEnd+0.5);
+p = polyfit(s,f,1);
 
+s = -0.5:(n+0.5);
+% x-corner locations
+x = polyval(p,s);
+% y-corner locations
+y = polyval(p,s);
+
+%{
 %% Create patch representation
+% SLOW METHOD, WAY TOO MANY PATCH OBJECTS!
 fig = figure;
 axs = axes('Parent',fig);
 hold(axs,'on');
 daspect(axs,[1 1 1]);
 
-% SLOW METHOD, WAY TOO MANY PATCH OBJECTS!
 for i = 1:m
     for j = 1:n
         v_ij(1,:) = [x(j)  , y(i)  , 0];
@@ -68,6 +121,7 @@ for i = 1:m
         end
     end
 end
+%}
 
 %% Create patch representation, two patch objects
 % TODO - actually work out indexing...
@@ -80,37 +134,140 @@ for i = 1:m+1
     end
 end
 
-faces_k = [];
-faces_w = [];
-faces_b = [];
+faces{1} = [];
+faces{2} = [];
+faces{3} = [];
 for i = 1:m
     for j = 1:n
+        % Define vertex indices
         idx_ij(1,:) = [j  ,i  ];
         idx_ij(2,:) = [j+1,i  ];
         idx_ij(3,:) = [j+1,i+1];
         idx_ij(4,:) = [j  ,i+1];
-        
-        for k = 1:size(idx_ij,2)
+
+        % Define face indices
+        for k = 1:size(idx_ij,1)
             face(1,k) = find( idx(:,1) == idx_ij(k,1) & idx(:,2) == idx_ij(k,2) );
         end
 
+        % Packages black/white faces
         switch im(i,j)
             case 0
-                faces_k(end+1,:) = face;
+                % Black Face
+                faces{1}(end+1,:) = face;
             case 255
-                faces_w(end+1,:) = face;
+                % White Face
+                faces{2}(end+1,:) = face;
             otherwise
-                % Error check
-                faces_b(end+1,:) = face;
+                % Unexpected Face
+                % -> Error check
+                faces{3}(end+1,:) = face;
+                warning('Unexpected pixel value: im(%d,%d) = %d',i,j,im(i,j));
         end
     end
 end
 
-% Create patches
+%% Create render AprilTag
+% Create figure and axes
 fig = figure;
 axs = axes('Parent',fig);
 hold(axs,'on');
 daspect(axs,[1 1 1]);
-ptc_k = patch('Vertices',verts,'Faces',faces_k,'EdgeColor','m','FaceColor','k');
-ptc_w = patch('Vertices',verts,'Faces',faces_w,'EdgeColor','m','FaceColor','w');
-ptc_b = patch('Vertices',verts,'Faces',faces_b,'EdgeColor','m','FaceColor','b');
+% Add light to axes
+%lgt = addSingleLight(axs);
+
+
+% Create parent to adjust AprilTag pose relative to camera frame
+h_t2c = triad('Parent',axs,'Scale',(2/3)*tagSize,'LineWidth',1);
+hideTriad(h_t2c);
+
+% Render AprilTag
+colors = 'kwm';
+for i = 1:numel(faces)
+    if ~isempty(faces{i})
+        ptc(i) = patch('Parent',h_t2c,'Vertices',verts,'Faces',faces{i},...
+            'EdgeColor','none','FaceColor',colors(i));
+    end
+end
+% Adjust patch face lighting
+% -> FaceLighting 'none' should provide high contrast regardless of
+%    lighting
+set(ptc,'FaceLighting','None');
+
+%% Test with simulated image
+load('Exp_AprilTag.mat');
+
+% Recover extrinsics
+H_t2c = eye(4);
+H_t2c(1:3,1:3) = poses(1).Rotation.';
+H_t2c(1:3,4) = poses(1).Translation.';
+
+set(h_t2c,'Matrix',H_t2c);
+
+% Simulate image
+imSim = simulateImage(axs,cameraParams,eye(4));
+
+% Recover intrinsics from camera parameters
+intrinsics = cameraParams.Intrinsics;
+% Recover intrinsic matrix for reprojection
+A_c2m = intrinsics.IntrinsicMatrix.';
+
+% Read AprilTag
+[id,loc,pose] = readAprilTag(imSim,tagFamily,intrinsics,tagSize);
+
+%% Plot result
+figSim = figure;
+axsSim = axes('Parent',figSim);
+imgSim = imshow(imSim,'Parent',axsSim);
+hold(axsSim,'on');
+
+if ~isempty(id)
+    % Define corner points
+    c_m = loc.';
+
+    % Plot tag location and ID
+    ps = polyshape(c_m(1,:),c_m(2,:));
+    plt_loc = plot(ps,'Parent',axsSim,'FaceColor','m',...
+        'FaceAlpha',0.5,'EdgeColor','m');
+    [x,y] = centroid(ps);
+    txt_ID = text(x,y,sprintf('%d',id),...
+        'Parent',axsSim,'HorizontalAlignment','center',...
+        'VerticalAlignment','middle','Color','w','FontWeight','bold',...
+        'FontSize',8);
+    for k = 1:size(c_m,2)
+        txt_loc(k) = text(c_m(1,k),c_m(2,k),sprintf('v_{%d}',k),...
+            'Parent',axsSim,'HorizontalAlignment','center',...
+            'VerticalAlignment','middle','Color','k',...
+            'FontWeight','bold','FontSize',6);
+    end
+
+    % Define & plot tag pose
+    H_t2c_tst = eye(4);
+    H_t2c_tst(1:3,1:3) = pose.Rotation.';
+    H_t2c_tst(1:3,4) = pose.Translation.';
+
+    % Define x/y/z axes in the tag frame
+    X_t = tagSize*eye(3);
+    X_t = [zeros(3,1), X_t];
+    X_t(4,:) = 1;
+    % Project to image
+    sX_m = A_c2m*H_t2c_tst(1:3,:)*X_t;
+    X_m = sX_m./sX_m(3,:);
+    % Plot axes
+    colors = 'rgb';
+    for k = 2:4
+        plt_pose(k) = plot(axsSim,...
+            [X_m(1,1),X_m(1,k)],[X_m(2,1),X_m(2,k)],...
+            colors(k-1),'LineWidth',1);
+    end
+
+    % Define projected tag outline (defined using tagSize)
+    X_t = (1/2)*tagSize*[-1, 1, 1, -1; -1, -1, 1, 1];
+    X_t(4,:) = 1;
+    % Project to image
+    sX_m = A_c2m*H_t2c_tst(1:3,:)*X_t;
+    X_m = sX_m./sX_m(3,:);
+    ps = polyshape(X_m(1,:),X_m(2,:));
+    plt_loc(j) = plot(ps,'Parent',axsSim,'FaceColor','none',...
+        'EdgeColor','c');
+end

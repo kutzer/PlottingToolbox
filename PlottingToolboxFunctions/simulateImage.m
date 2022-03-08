@@ -22,7 +22,7 @@ function im = simulateImage(axs,params,H_a2c)
 %   05Jan2021 - Faster implementation using getframe
 %   26Apr2021 - Fully leverage camera parameters
 
-debugON = true;
+debugON = false;
 
 %% Set defaults
 if nargin < 6
