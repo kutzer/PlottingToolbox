@@ -14,7 +14,8 @@ clc
 %% Specify tagFamily, tagID, and tagSize
 tagFamily = 'tag36h11';
 tagID = 2;
-tagSize = 130; % (mm)
+%tagSize = 130; % (mm)
+tagSize = 200;
 
 % tagFamily = 'tagCustom48h12';
 % tagID = 36;
@@ -32,9 +33,15 @@ fname = sprintf('tag%s_%s_%05d.png',...
 im = imread( fullfile(pname,fname) );
 im = rgb2gray(im);
 
-figure; imshow(im);
-set(gca,'Units','Normalized','Position',[0.1,0.1,0.8,0.8],'Visible','on');
-grid on
+figTag = figure('Name',sprintf('%s, %s',tagFamily,fname));
+axsTag = axes('Parent',figTag);
+imgTag = imshow(im);
+set(figTag,'Units','Normalized','Position',[0.2,0.2,0.6,0.6]);
+set(axsTag,'Units','Normalized','Position',[0.1,0.1,0.8,0.8],'Visible','on');
+grid(axsTag,'on');
+hold(axsTag,'on');
+xlabel(axsTag,'x (pixels)');
+ylabel(axsTag,'y (pixels)');
 
 %% Define tagSize box
 [m,n] = size(im);
@@ -85,15 +92,23 @@ end
 
 %% Define x/y coordinates
 f = linspace(-tagSize/2,tagSize/2,nSize+1);
-s = (iStart-0.5):(iEnd+0.5);
-p = polyfit(s,f,1);
+s_tagSize = (iStart-0.5):(iEnd+0.5);
+p = polyfit(s_tagSize,f,1);
 
-s = -0.5:(n+0.5);
 % x-corner locations
-x = polyval(p,s);
+x = polyval(p,s_tagSize);
 % y-corner locations
-y = polyval(p,s);
+y = polyval(p,s_tagSize);
 
+%% Plot resultant indices
+for i = 1:numel(y)-1
+    for j = 1:numel(x)-1
+        v = (numel(x))*([x(j), y(i); x(j+1), y(i); x(j+1), y(i+1); x(j), y(i+1)] - x(1))./(2*x(end)) + (1/2);
+        f = 1:4;
+        pix(i,j) = patch('Parent',axsTag,'Vertices',v,'faces',f,...
+            'FaceColor','none','EdgeColor','m');
+    end
+end
 %{
 %% Create patch representation
 % SLOW METHOD, WAY TOO MANY PATCH OBJECTS!
@@ -122,6 +137,14 @@ for i = 1:m
     end
 end
 %}
+return
+%% 
+
+s_tagBounds = 0.5:(n+0.5);
+% x-corner locations
+x = polyval(p,s_tagBounds);
+% y-corner locations
+y = polyval(p,s_tagBounds);
 
 %% Create patch representation, two patch objects
 % TODO - actually work out indexing...
@@ -176,12 +199,12 @@ daspect(axs,[1 1 1]);
 % Add light to axes
 %lgt = addSingleLight(axs);
 
-
 % Create parent to adjust AprilTag pose relative to camera frame
 h_t2c = triad('Parent',axs,'Scale',(2/3)*tagSize,'LineWidth',1);
-hideTriad(h_t2c);
 
 % Render AprilTag
+% -> NOTE: Magenta pixels indicate a "bad face" (i.e. a face with pixel
+%    value \notin {0,255}
 colors = 'kwm';
 for i = 1:numel(faces)
     if ~isempty(faces{i})
@@ -189,11 +212,37 @@ for i = 1:numel(faces)
             'EdgeColor','none','FaceColor',colors(i));
     end
 end
+
+% Overlay tagSize
+x_tagSize = polyval(p,[s_tagSize(1),s_tagSize(end)]);
+y_tagSize = polyval(p,[s_tagSize(1),s_tagSize(end)]);
+verts_tagSize = [...
+    x_tagSize(1), y_tagSize(1);...
+    x_tagSize(2), y_tagSize(1);...
+    x_tagSize(2), y_tagSize(2);
+    x_tagSize(1), y_tagSize(2)];
+faces_tagSize = 1:4;
+ptc_tagSize = patch('Vertices',verts_tagSize,'Faces',faces_tagSize,...
+    'Parent',h_t2c,'EdgeColor','c','FaceColor','none');
+
+% Overlay tagBounds
+x_tagBounds = polyval(p,[s_tagBounds(1),s_tagBounds(end)]);
+y_tagBounds = polyval(p,[s_tagBounds(1),s_tagBounds(end)]);
+verts_tagBounds = [...
+    x_tagBounds(1), y_tagBounds(1);...
+    x_tagBounds(2), y_tagBounds(1);...
+    x_tagBounds(2), y_tagBounds(2);
+    x_tagBounds(1), y_tagBounds(2)];
+faces_tagBounds = 1:4;
+ptc_tagBounds = patch('Vertices',verts_tagBounds,'Faces',faces_tagBounds,...
+    'Parent',h_t2c,'EdgeColor','m','FaceColor','none');
+
 % Adjust patch face lighting
 % -> FaceLighting 'none' should provide high contrast regardless of
 %    lighting
 set(ptc,'FaceLighting','None');
 
+return
 %% Test with simulated image
 load('Exp_AprilTag.mat');
 
@@ -205,7 +254,9 @@ H_t2c(1:3,4) = poses(1).Translation.';
 set(h_t2c,'Matrix',H_t2c);
 
 % Simulate image
+hideTriad(h_t2c); set([ptc_tagSize,ptc_tagBounds],'Visible','off');
 imSim = simulateImage(axs,cameraParams,eye(4));
+showTriad(h_t2c); set([ptc_tagSize,ptc_tagBounds],'Visible','on');
 
 % Recover intrinsics from camera parameters
 intrinsics = cameraParams.Intrinsics;
