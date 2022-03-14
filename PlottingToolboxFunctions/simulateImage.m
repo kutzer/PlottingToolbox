@@ -6,6 +6,7 @@ function im = simulateImage(axs,params,H_a2c)
 %   parameters and camera extrinsics.
 %
 %   Inputs:
+%          axs - Axes handle containing environment for simulating image
 %       params - MATLAB camera parameters
 %         H_a2c - extrinsic matrix relating the global frame of axs to the 
 %                camera axes
@@ -21,6 +22,8 @@ function im = simulateImage(axs,params,H_a2c)
 %   05Jan2021 - Add light (TODO - allow adjustable light position & color)
 %   05Jan2021 - Faster implementation using getframe
 %   26Apr2021 - Fully leverage camera parameters
+
+% TODO - account for pixels that are behind the camera
 
 debugON = false;
 
