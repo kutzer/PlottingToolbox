@@ -147,7 +147,7 @@ handles.Boundary = patch('Parent',h_t2p,'Vertices',v,...
 
 % Patch background
 % -> Define offset between front of tag and background
-backgroundOffset = tagSize/500; 
+backgroundOffset = tagInfo.Size/500; 
 % -> Define vertices
 v_f = tagInfo.Boundary;
 v_f(:,3) = 0;                   % Append z-coordinate
