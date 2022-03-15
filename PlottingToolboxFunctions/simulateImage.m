@@ -16,6 +16,17 @@ function im = simulateImage(axs,params,H_a2c)
 %   Outputs:
 %       im - vpix x hpix RGB image
 %
+%   Example: Using Camera Parameters
+%       im = simulateImage(axs,cameraParams,H_a2c);
+%
+%   Example: Use pinhole camera definition only
+%       params.IntrinsicMatrix = cameraParams.IntrinsicMatrix;
+%       params.ImageSize = cameraParams.ImageSize;
+%       im = simulateImage(axs,cameraParams,H_a2c);
+%
+%   Example: Use Fisheye Parameters
+%       im = simulateImage(axs,fisheyeParams,H_a2c);
+%
 %   See also plotCameraFOV
 %
 %   M. Kutzer, 18Feb2016, USNA
@@ -28,6 +39,7 @@ function im = simulateImage(axs,params,H_a2c)
 %               distortion/model)
 %   15Mar2022 - Updated to ignore children of hidden hgtransform objects
 %   15Mar2022 - Updated to include image distortion using worldToImage.m
+%   15Mar2022 - Updated to include examples
 
 % TODO - account for pixels that are behind the camera
 
@@ -41,18 +53,24 @@ narginchk(3,3);
 %% Parse camera parameters
 % TODO - allow the user to specify the intrinsic matrix only
 
-% Define flag indicating use of camera/fisheye parameters
-useParams = true;
+% Define flags indicating use of camera/fisheye parameters
+%   useParams - we are using camera/fisheye parameters
+%   isFisheye - parameters are fisheye (applies to "apply distortion")
 % Identify type of camera parameters
 switch lower( class(params) )
     case 'cameraparameters'
+        useParams = true;
+        isFisheye = false;
         res = params.ImageSize;
         intrinsics = params;
     case 'fisheyeparameters'
+        useParams = true;
+        isFisheye = true;
         res = params.Intrinsics.ImageSize;
         intrinsics = params.Intrinsics;
     otherwise
         useParams = false;
+        isFisheye = false;
         res = params.ImageSize;
         warning('"params" should be specified as a valid camera paramters or fisheye parameters (see cameraCalibrator.m)');
 end
@@ -140,7 +158,18 @@ for idx = 1:numel(kids)
                         % Define image points
                         % -> rigid3d provides a "rigid3d" object
                         %    representing H_c2c (i.e. the identity) 
-                        X_m = worldToImage(intrinsics,rigid3d,X_c(1:3,:).');
+                        if isFisheye
+                            X_m = worldToImage(...
+                                intrinsics,...
+                                rigid3d,...
+                                X_c(1:3,:).');
+                        else
+                            X_m = worldToImage(...
+                                intrinsics,...
+                                rigid3d,...
+                                X_c(1:3,:).',...
+                                'ApplyDistortion',true);
+                        end
                         X_m = X_m.';
                         z_c = X_c(3,:);
                     else
