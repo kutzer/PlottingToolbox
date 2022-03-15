@@ -26,11 +26,12 @@ function varargout = PlottingToolboxVer
 %   15Dec2021 - Added C0 and C1 options to pShapesToSplines
 %   03Mar2022 - Added appendLine function
 %   14Mar2022 - Added simulateAprilTag and plotAprilTag
+%   15Mar2022 - Added isVisible and cameraParam support for plotCameraFOV
 
 A.Name = 'Plotting Toolbox';
-A.Version = '1.1.0';
+A.Version = '1.1.1';
 A.Release = '(R2020b)';
-A.Date = '14-Mar-2022';
+A.Date = '15-Mar-2022';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);

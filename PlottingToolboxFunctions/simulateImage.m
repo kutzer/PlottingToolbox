@@ -1,7 +1,7 @@
 function im = simulateImage(axs,params,H_a2c)
 % SIMULATEIMAGE Simulate image of a specified axes handle given a
 % projection matrix.
-%   im = SIMULATEIMAGE(axs,params,H_c2a,dpi) returns a simulated image of
+%   im = SIMULATEIMAGE(axs,params,H_c2a) returns a simulated image of
 %   all objects contained in a specified axes object (axs) using camera
 %   parameters and camera extrinsics.
 %
@@ -10,7 +10,8 @@ function im = simulateImage(axs,params,H_a2c)
 %       params - MATLAB camera parameters
 %         H_a2c - extrinsic matrix relating the global frame of axs to the 
 %                camera axes
-%          dpi - [OPTIONAL, Unused] desired dots per inch (default is 96)
+%          dpi - [OPTIONAL, Not Implemented] desired dots per inch 
+%                (default is 96)
 %
 %   Outputs:
 %       im - vpix x hpix RGB image
@@ -21,17 +22,19 @@ function im = simulateImage(axs,params,H_a2c)
 %   05Jan2021 - Updated documentation
 %   05Jan2021 - Add light (TODO - allow adjustable light position & color)
 %   05Jan2021 - Faster implementation using getframe
-%   26Apr2021 - Fully leverage camera parameters
+%   26Apr2021 - Fully leverage camera parameters (except lens
+%               distortion/model)
+%   15Mar2022 - Updated to ignore children of hidden hgtransform objects
 
 % TODO - account for pixels that are behind the camera
+% TODO - account for lens distortion
 
 debugON = false;
 
 %% Set defaults
-if nargin < 6
-    %dpi = 200;
-    dpi = 96;
-end
+narginchk(3,3);
+
+%dpi = 96; % <--- Unused
 
 %% Parse camera parameters
 % TODO - allow the user to specify the intrinsic matrix only
@@ -70,6 +73,11 @@ set(pLgt,'Position',[1,0,1]);
 kids = findall(axs);
 for idx = 1:numel(kids)
     kid = kids(idx);
+    % Check if kid is visible
+    if ~isVisible(kid)
+        continue
+    end
+    % Project visible kids into the simulated image
     switch lower( get(kid,'Type') )
         case {'patch','surface','line'}
             switch lower(get(kid,'Visible'))
