@@ -7,7 +7,9 @@ function im = simulateImage(axs,params,H_a2c)
 %
 %   Inputs:
 %          axs - Axes handle containing environment for simulating image
-%       params - MATLAB camera parameters or fisheye parameters
+%       params - MATLAB camera parameters, fisheye parameters, or
+%                structured array containing fields "IntrinsicMatrix" and
+%                "ImageSize". 
 %         H_a2c - extrinsic matrix relating the global frame of axs to the 
 %                camera axes
 %          dpi - [Not Implemented] desired dots per inch 
@@ -19,7 +21,7 @@ function im = simulateImage(axs,params,H_a2c)
 %   Example: Using Camera Parameters
 %       im = simulateImage(axs,cameraParams,H_a2c);
 %
-%   Example: Use pinhole camera definition only
+%   Example: Use pinhole camera definition only (ignore distortion)
 %       params.IntrinsicMatrix = cameraParams.IntrinsicMatrix;
 %       params.ImageSize = cameraParams.ImageSize;
 %       im = simulateImage(axs,cameraParams,H_a2c);
@@ -40,6 +42,7 @@ function im = simulateImage(axs,params,H_a2c)
 %   15Mar2022 - Updated to ignore children of hidden hgtransform objects
 %   15Mar2022 - Updated to include image distortion using worldToImage.m
 %   15Mar2022 - Updated to include examples
+%   15Mar2022 - Updated to check for user-defined parameters
 
 % TODO - account for pixels that are behind the camera
 
@@ -59,20 +62,32 @@ narginchk(3,3);
 % Identify type of camera parameters
 switch lower( class(params) )
     case 'cameraparameters'
+        % MATLAB Camera Parameters
         useParams = true;
         isFisheye = false;
         res = params.ImageSize;
         intrinsics = params;
     case 'fisheyeparameters'
+        % MATLAB Fisheye Parameters
         useParams = true;
         isFisheye = true;
         res = params.Intrinsics.ImageSize;
         intrinsics = params.Intrinsics;
     otherwise
+        % User-defined intrinsics & image size
+        if ~isstruct(params)
+            error('"params" must be a camera/fisheye parameters variable or structured array');
+        end
+
+        rq_fields = {'ImageSize','IntrinsicMatrix'};
+        bin = isfield(params,rq_fields);
+        if nnz(bin) ~= numel(bin)
+            error('User-defined "params" must include the fields "ImageSize" and "IntrinsicMatrix".');
+        end
+
         useParams = false;
         isFisheye = false;
         res = params.ImageSize;
-        warning('"params" should be specified as a valid camera paramters or fisheye parameters (see cameraCalibrator.m)');
 end
 
 % Define image size
