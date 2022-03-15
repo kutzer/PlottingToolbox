@@ -376,7 +376,10 @@ if debugOn
     axsTag = axes('Parent',figTag);
     hold(axsTag,'on');
     daspect(axsTag,[1 1 1]);
+    view(axsTag,[180,-90]);
+    xlabel(axsTag,'x (tagSize linear units)');
 
+    ylabel(axsTag,'y (tagSize linear units)');
     % Create parent to adjust AprilTag pose relative to camera frame
     % H_t2c - transformation relating the body-fixed "tag" frame to the camera
     %         frame
@@ -397,12 +400,24 @@ if debugOn
     faces_tagSize = 1:4;
     ptc_tagSize = patch('Vertices',verts_tagLocation,'Faces',faces_tagSize,...
         'Parent',h_t2c,'EdgeColor','c','FaceColor','none');
+    
+    % Display location numbering
+    for i = 1:size(verts_tagLocation,1)
+        txt_loc(i) = text(verts_tagLocation(i,1),verts_tagLocation(i,2),...
+            sprintf('loc_%d',i),'Parent',h_t2c);
+    end
 
     % Display tag bounds
     faces_tagBounds = 1:4;
     ptc_tagBounds = patch('Vertices',verts_tagBounds,'Faces',faces_tagBounds,...
         'Parent',h_t2c,'EdgeColor','m','FaceColor','none');
     
+    % Display bounds numbering
+    for i = 1:size(verts_tagBounds,1)
+        txt_bnd(i) = text(verts_tagBounds(i,1),verts_tagBounds(i,2),...
+            sprintf('bnd_%d',i),'Parent',h_t2c);
+    end
+
     legend([ptc_tagSize,ptc_tagBounds],'tagSize','tagBoundary');
 
     % Adjust patch face lighting
