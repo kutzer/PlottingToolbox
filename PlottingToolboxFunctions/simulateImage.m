@@ -1,22 +1,24 @@
 function im = simulateImage(axs,params,H_a2c)
 % SIMULATEIMAGE Simulate image of a specified axes handle given a
 % projection matrix.
-%   im = SIMULATEIMAGE(axs,params,H_c2a) returns a simulated image of
+%   im = SIMULATEIMAGE(axs,params,H_a2c) returns a simulated image of
 %   all objects contained in a specified axes object (axs) using camera
 %   parameters and camera extrinsics.
 %
 %   Inputs:
 %          axs - Axes handle containing environment for simulating image
-%       params - MATLAB camera parameters
+%       params - MATLAB camera parameters or fisheye parameters
 %         H_a2c - extrinsic matrix relating the global frame of axs to the 
 %                camera axes
-%          dpi - [OPTIONAL, Not Implemented] desired dots per inch 
+%          dpi - [Not Implemented] desired dots per inch 
 %                (default is 96)
 %
 %   Outputs:
 %       im - vpix x hpix RGB image
 %
-% M. Kutzer, 18Feb2016, USNA
+%   See also plotCameraFOV
+%
+%   M. Kutzer, 18Feb2016, USNA
 
 % Updates
 %   05Jan2021 - Updated documentation
@@ -25,9 +27,9 @@ function im = simulateImage(axs,params,H_a2c)
 %   26Apr2021 - Fully leverage camera parameters (except lens
 %               distortion/model)
 %   15Mar2022 - Updated to ignore children of hidden hgtransform objects
+%   15Mar2022 - Updated to include image distortion using worldToImage.m
 
 % TODO - account for pixels that are behind the camera
-% TODO - account for lens distortion
 
 debugON = false;
 
@@ -38,17 +40,37 @@ narginchk(3,3);
 
 %% Parse camera parameters
 % TODO - allow the user to specify the intrinsic matrix only
+
+% Define flag indicating use of camera/fisheye parameters
+useParams = true;
+% Identify type of camera parameters
+switch lower( class(params) )
+    case 'cameraparameters'
+        res = params.ImageSize;
+        intrinsics = params;
+    case 'fisheyeparameters'
+        res = params.Intrinsics.ImageSize;
+        intrinsics = params.Intrinsics;
+    otherwise
+        useParams = false;
+        res = params.ImageSize;
+        warning('"params" should be specified as a valid camera paramters or fisheye parameters (see cameraCalibrator.m)');
+end
+
 % Define image size
-vpix = params.ImageSize(1);
-hpix = params.ImageSize(2);
-% Define intrinsics
-% - Camera frame relative to matrix frame
-A_c2m = transpose( params.IntrinsicMatrix );
-% Define extrinsics
-% - Axes frame relative to camera frame
-% H_a2c
-% Define projection
-P_a2m = A_c2m*H_a2c(1:3,:);
+vpix = res(1);
+hpix = res(2);
+
+if ~useParams
+    % Define intrinsics
+    % - Camera frame relative to matrix frame
+    A_c2m = transpose( params.IntrinsicMatrix );
+    % Define extrinsics
+    % - Axes frame relative to camera frame
+    % H_a2c
+    % Define projection
+    P_a2m = A_c2m*H_a2c(1:3,:);
+end
 
 %% Setup new figure
 pFig = figure('Visible','off','HandleVisibility','off',...
@@ -108,16 +130,33 @@ for idx = 1:numel(kids)
                     % Get absolute transform
                     H_k2a = getAbsoluteTransform(kid);
                     % Project points
-                    X_k(4,:) = 1;
-                    sX_m = P_a2m*H_k2a*X_k;
-                    % Account for scaling
-                    z_c = sX_m(3,:);
-                    X_m = sX_m./repmat(z_c,3,1);
-                    % Apply lens distortion
-                    % TODO - confirm distortion model
-                    %X_m(1:2,:) = distortImagePoints(X_m(1:2,:),params);
-                    % TODO - address background foreground issues
+                    if useParams
+                        % Use camera parameters (with distortion)
+                        X_k(4,:) = 1;
+                        % Define combine extrinsics
+                        H_k2c = H_a2c*H_k2a;
+                        % Define points relative to camera frame
+                        X_c = H_k2c*X_k;
+                        % Define image points
+                        % -> rigid3d provides a "rigid3d" object
+                        %    representing H_c2c (i.e. the identity) 
+                        X_m = worldToImage(intrinsics,rigid3d,X_c(1:3,:).');
+                        X_m = X_m.';
+                        z_c = X_c(3,:);
+                    else
+                        % Use pinhole model ignoring distortion
+                        X_k(4,:) = 1;
+                        sX_m = P_a2m*H_k2a*X_k;
+                        % Account for scaling
+                        z_c = sX_m(3,:);
+                        X_m = sX_m./repmat(z_c,3,1);
+                        % Apply lens distortion
+                        % TODO - confirm distortion model
+                        %X_m(1:2,:) = distortImagePoints(X_m(1:2,:),params);
+                    end
+                    % TODO - better address background foreground issues
                     X_m(3,:) = z_c;
+
                     % Get new data
                     for i = 1:3
                         xp{i} = reshape(X_m(i,:),dim{i});
