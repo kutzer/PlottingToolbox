@@ -35,8 +35,8 @@ narginchk(2,4);
 % Define axs (parent object)
 vIDX = 1;
 if ishandle(varargin{vIDX})
-    vIDX = vIDX + 1;
     axs = varargin{vIDX};
+    vIDX = vIDX + 1;
 else
     axs = gca;
     hold(axs,'on');
