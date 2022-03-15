@@ -17,11 +17,12 @@ function tagInfo = simulateAprilTag(tagFamily,tagID,tagSize)
 %           *.Family - character array specifying the AprilTag family
 %           *.ID     - scalar integer specifying AprilTag ID
 %           *.Size   - scalar value specifying the AprilTag size
-%           *.Location - 2x4 array containing the x/y corners of the tag
+%           *.Location - 4x2 array containing the x/y corners of the tag
 %                        associated with the tagSize
-%           *.Boundary - 2x4 array containing the x/y corners of the tag
+%           *.Boundary - 4x2 array containing the x/y corners of the tag
 %                        associated with the tag boundary
-%           *.Vertices - Nx3 array containing x/y/z locations of the
+%           *.Vertices - Nx2 array containing x/y locations of the pixel
+%                        corners scaled according to tagSize 
 %           *.BlackFaces - Bx4 array containing vertex indices associated
 %                          with black AprilTag pixels/faces
 %           *.WhiteFaces - Wx4 array containing vertex indices associated
@@ -295,7 +296,7 @@ verts = [];
 for i = 1:numel(y_tag)
     for j = 1:numel(x_tag)
         idx(end+1,:) = [j,i];
-        verts(end+1,:) = [x_tag(j),y_tag(i),0];
+        verts(end+1,:) = [x_tag(j),y_tag(i)];
     end
 end
 
