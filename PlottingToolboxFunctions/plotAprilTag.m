@@ -42,6 +42,10 @@ function [h_t2p,handles] = plotAprilTag(varargin)
 %
 %   M. Kutzer, 14Mar2022, USNA
 
+% Updates
+%   15Mar2022 - Adjusted background/backing patch to exist in the
+%               +z-direction matching the actual AprilTag direction.
+
 %% Check input(s)
 narginchk(1,4);
 
@@ -152,7 +156,7 @@ backgroundOffset = tagInfo.Size/500;
 v_f = tagInfo.Boundary;
 v_f(:,3) = 0;                   % Append z-coordinate
 v_b = tagInfo.Boundary;
-v_b(:,3) = -backgroundOffset;   % Append z-coordinate w/ ASSUMED OFFSET!
+v_b(:,3) = backgroundOffset;   % Append z-coordinate w/ ASSUMED OFFSET!
 v = [v_f; v_b];     % Combine vertices
 % -> Define faces
 f(1,:) = [5,6,7,8]; % Back face
