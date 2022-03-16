@@ -43,8 +43,7 @@ function im = simulateImage(axs,params,H_a2c)
 %   15Mar2022 - Updated to include image distortion using worldToImage.m
 %   15Mar2022 - Updated to include examples
 %   15Mar2022 - Updated to check for user-defined parameters
-
-% TODO - account for pixels that are behind the camera
+%   16Mar2022 - Updated to remove points lying behind the camera
 
 debugON = false;
 
@@ -194,12 +193,27 @@ for idx = 1:numel(kids)
                         % Account for scaling
                         z_c = sX_m(3,:);
                         X_m = sX_m./repmat(z_c,3,1);
-                        % Apply lens distortion
-                        % TODO - confirm distortion model
-                        %X_m(1:2,:) = distortImagePoints(X_m(1:2,:),params);
                     end
-                    % TODO - better address background foreground issues
+                    
+                    % Apply simulated depth to image
+                    % -> This allows projected points closer to the camera
+                    %    to occlude points farther from the camera. This
+                    %    also allows lighting to provide the appearance of
+                    %    depth
+                    %
+                    % TODO - better address background/foreground rendering
                     X_m(3,:) = z_c;
+
+                    % Remove projected points behind the camera
+                    % -> Remove vertices with a negative z_c
+                    %
+                    % TODO - consider keeping points contained on faces
+                    %        partially infront of the camera. This current
+                    %        approach may yield a saw-tooth pattern along
+                    %        the edge of the image for objects close to the
+                    %        camera.
+                    bin = z_c < 0;
+                    X_m(:,bin) = nan;
 
                     % Get new data
                     for i = 1:3
