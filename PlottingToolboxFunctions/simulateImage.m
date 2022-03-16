@@ -31,6 +31,11 @@ function im = simulateImage(axs,params,H_a2c)
 %
 %   See also plotCameraFOV
 %
+%   Known Issues:
+%       (1) When using Camera Parameters that includes non-zero distortion,
+%           objects close to the camera that are outside of the camera FOV
+%           appear in the foreground of the image.
+%
 %   M. Kutzer, 18Feb2016, USNA
 
 % Updates
@@ -45,6 +50,13 @@ function im = simulateImage(axs,params,H_a2c)
 %   15Mar2022 - Updated to check for user-defined parameters
 %   16Mar2022 - Updated to remove points lying behind the camera
 
+% TODO - address foreground issue! 
+
+%% Debug flag
+% NOTE: When debugON = true, the variables "pFig" and "pAxs" are assigned 
+%       to the base workspace. These handles are associated with the 
+%       simulated figure and axes handles.
+% See: ..\PlottingToolbox Example SCRIPTS\SCRIPT_Test_simulateImage
 debugON = false;
 
 %% Set defaults
@@ -214,6 +226,16 @@ for idx = 1:numel(kids)
                     %        camera.
                     bin = z_c < 0;
                     X_m(:,bin) = nan;
+                    
+                    % Remove projected points outside the known image
+                    % resolution
+                    %
+                    % TODO - consider keeping points contained on faces
+                    %        partially within the image
+                    bin =...
+                        (X_m(:,1) < 0 | X_m(:,1) > hpix) | ...
+                        (X_m(:,2) < 0 | X_m(:,2) > vpix);
+                    X_m(:,bin) = nan;
 
                     % Get new data
                     for i = 1:3
@@ -245,7 +267,7 @@ end
 
 %% Close pFig
 if debugON
-    set(pFig,'Visible','on');
+    set(pFig,'Visible','on','HandleVisibility','on');
     assignin('base','pFig',pFig);
     assignin('base','pAxs',pAxs);
 else
