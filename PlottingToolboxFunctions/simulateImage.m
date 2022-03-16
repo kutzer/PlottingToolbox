@@ -24,7 +24,7 @@ function im = simulateImage(axs,params,H_a2c)
 %   Example: Use pinhole camera definition only (ignore distortion)
 %       params.IntrinsicMatrix = cameraParams.IntrinsicMatrix;
 %       params.ImageSize = cameraParams.ImageSize;
-%       im = simulateImage(axs,cameraParams,H_a2c);
+%       im = simulateImage(axs,params,H_a2c);
 %
 %   Example: Use Fisheye Parameters
 %       im = simulateImage(axs,fisheyeParams,H_a2c);
