@@ -9,10 +9,10 @@ function im = simulateImage(axs,params,H_a2c)
 %          axs - Axes handle containing environment for simulating image
 %       params - MATLAB camera parameters, fisheye parameters, or
 %                structured array containing fields "IntrinsicMatrix" and
-%                "ImageSize". 
-%         H_a2c - extrinsic matrix relating the global frame of axs to the 
+%                "ImageSize".
+%         H_a2c - extrinsic matrix relating the global frame of axs to the
 %                camera axes
-%          dpi - [Not Implemented] desired dots per inch 
+%          dpi - [Not Implemented] desired dots per inch
 %                (default is 96)
 %
 %   Outputs:
@@ -50,11 +50,11 @@ function im = simulateImage(axs,params,H_a2c)
 %   15Mar2022 - Updated to check for user-defined parameters
 %   16Mar2022 - Updated to remove points lying behind the camera
 
-% TODO - address foreground issue! 
+% TODO - address foreground issue!
 
 %% Debug flag
-% NOTE: When debugON = true, the variables "pFig" and "pAxs" are assigned 
-%       to the base workspace. These handles are associated with the 
+% NOTE: When debugON = true, the variables "pFig" and "pAxs" are assigned
+%       to the base workspace. These handles are associated with the
 %       simulated figure and axes handles.
 % See: ..\PlottingToolbox Example SCRIPTS\SCRIPT_Test_simulateImage
 debugON = false;
@@ -183,7 +183,7 @@ for idx = 1:numel(kids)
                         X_c = H_k2c*X_k;
                         % Define image points
                         % -> rigid3d provides a "rigid3d" object
-                        %    representing H_c2c (i.e. the identity) 
+                        %    representing H_c2c (i.e. the identity)
                         if isFisheye
                             X_m = worldToImage(...
                                 intrinsics,...
@@ -206,7 +206,7 @@ for idx = 1:numel(kids)
                         z_c = sX_m(3,:);
                         X_m = sX_m./repmat(z_c,3,1);
                     end
-                    
+
                     % Apply simulated depth to image
                     % -> This allows projected points closer to the camera
                     %    to occlude points farther from the camera. This
@@ -226,17 +226,18 @@ for idx = 1:numel(kids)
                     %        camera.
                     bin = z_c < 0;
                     X_m(:,bin) = nan;
-                    
-                    % Remove projected points outside the known image
-                    % resolution
-                    %
-                    % TODO - consider keeping points contained on faces
-                    %        partially within the image
-                    bin =...
-                        (X_m(:,1) < 0 | X_m(:,1) > hpix) | ...
-                        (X_m(:,2) < 0 | X_m(:,2) > vpix);
-                    X_m(:,bin) = nan;
 
+                    if useParams
+                        % Remove projected points outside the known image
+                        % resolution
+                        %
+                        % TODO - consider keeping points contained on faces
+                        %        partially within the image
+                        bin =...
+                            (X_m(:,1) < 0 | X_m(:,1) > hpix) | ...
+                            (X_m(:,2) < 0 | X_m(:,2) > vpix);
+                        X_m(:,bin) = nan;
+                    end
                     % Get new data
                     for i = 1:3
                         xp{i} = reshape(X_m(i,:),dim{i});
@@ -261,7 +262,7 @@ im = im_struct.cdata;
 % Check if image is correct size and resize as needed
 % - Older versions of MATLAB create an image that is twice the size of the
 %   actual pixel size of the figure when using getframe.m
-if ( size(im,1) ~= vpix ) || ( size(im,2) ~= hpix ) 
+if ( size(im,1) ~= vpix ) || ( size(im,2) ~= hpix )
     im = imresize(im,[vpix,hpix]);
 end
 
