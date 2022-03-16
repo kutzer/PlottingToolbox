@@ -32,7 +32,7 @@ function im = simulateImage(axs,params,H_a2c)
 %   See also plotCameraFOV
 %
 %   Known Issues:
-%       (1) When using Camera Parameters that includes non-zero distortion,
+%       (1) When using Camera Parameters that include non-zero distortion,
 %           objects close to the camera that are outside of the camera FOV
 %           appear in the foreground of the image.
 %
