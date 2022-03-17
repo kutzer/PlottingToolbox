@@ -29,11 +29,14 @@ function varargout = PlottingToolboxVer
 %   15Mar2022 - Added isVisible and cameraParam support for plotCameraFOV
 %   16Mar2022 - Updated simulateImage to remove points lying behind the
 %               camera
+%   17Mar2022 - Updated simulateImage to remove points outside FOV (see
+%               "Known Issues") and incorporated common lighting between
+%               the simulation and simulated image
 
 A.Name = 'Plotting Toolbox';
-A.Version = '1.1.2';
+A.Version = '1.1.3';
 A.Release = '(R2020b)';
-A.Date = '16-Mar-2022';
+A.Date = '17-Mar-2022';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);
