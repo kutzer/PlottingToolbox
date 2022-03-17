@@ -49,6 +49,8 @@ function im = simulateImage(axs,params,H_a2c)
 %   15Mar2022 - Updated to include examples
 %   15Mar2022 - Updated to check for user-defined parameters
 %   16Mar2022 - Updated to remove points lying behind the camera
+%   17Mar2022 - Updated to place light in image simulation in a position
+%               matching the simulation
 
 % TODO - address foreground issue!
 
@@ -116,6 +118,19 @@ if ~useParams
     P_a2m = A_c2m*H_a2c(1:3,:);
 end
 
+%% Get current light and light position
+% Existing light in current axes (adds light if no light exists)
+%
+% TODO - Consider checking if a light exists and only adding if one does
+lgt = addSingleLight(axs);
+
+% Light position relative to simulation axes frame
+pLgt_a = get(lgt,'Position').';
+pLgt_a(4,:) = 1;
+
+% Define light position relative to camera frame
+pLgt_c = H_a2c*pLgt_a;
+
 %% Setup new figure
 pFig = figure('Visible','off','HandleVisibility','off',...
     'Tag','simulateImage','Name','simulateImage');
@@ -133,7 +148,8 @@ xlim(pAxs,[0.5,0.5] + [0,hpix]);
 ylim(pAxs,[0.5,0.5] + [0,vpix]);
 
 pLgt = addSingleLight(pAxs);
-set(pLgt,'Position',[1,0,1]);
+%set(pLgt,'Position',[1,0,1]);
+set(pLgt,'Position',pLgt_c(1:3).'); % Match lighting position to simulation
 
 %% Get list of all children
 kids = findall(axs);
