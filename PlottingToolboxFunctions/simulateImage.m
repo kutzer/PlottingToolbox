@@ -177,10 +177,12 @@ for idx = 1:numel(kids)
                     if useParams
                         % Use camera parameters (with distortion)
                         X_k(4,:) = 1;
+                        
                         % Define combine extrinsics
                         H_k2c = H_a2c*H_k2a;
                         % Define points relative to camera frame
                         X_c = H_k2c*X_k;
+
                         % Define image points
                         % -> rigid3d provides a "rigid3d" object
                         %    representing H_c2c (i.e. the identity)
@@ -234,8 +236,8 @@ for idx = 1:numel(kids)
                         % TODO - consider keeping points contained on faces
                         %        partially within the image
                         bin =...
-                            (X_m(:,1) < 0 | X_m(:,1) > hpix) | ...
-                            (X_m(:,2) < 0 | X_m(:,2) > vpix);
+                            (X_m(1,:) < 0 | X_m(1,:) > hpix) | ...
+                            (X_m(2,:) < 0 | X_m(2,:) > vpix);
                         X_m(:,bin) = nan;
                     end
                     % Get new data
