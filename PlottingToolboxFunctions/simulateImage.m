@@ -149,7 +149,34 @@ ylim(pAxs,[0.5,0.5] + [0,vpix]);
 
 pLgt = addSingleLight(pAxs);
 %set(pLgt,'Position',[1,0,1]);
-set(pLgt,'Position',pLgt_c(1:3).'); % Match lighting position to simulation
+
+% Match lighting position to simulation
+if useParams
+    if isFisheye
+        xLgt_m = worldToImage(...
+            intrinsics,...
+            rigid3d,...
+            pLgt_c(1:3,:).');
+        z_c = pLgt_c(3,:);
+    else
+        xLgt_m = worldToImage(...
+            intrinsics,...
+            rigid3d,...
+            pLgt_c(1:3,:).',...
+            'ApplyDistortion',true);
+        z_c = pLgt_c(3,:);
+    end
+else
+    % Use pinhole model ignoring distortion
+    sxLgt_m = A_c2m*pLgt_c;
+    % Account for scaling
+    z_c = sxLgt_m(3,:);
+    xLgt_m = sxLgt_m./repmat(z_c,3,1);
+end
+% Append artificial depth
+xLgt_m(3,:) = z_c;
+% Set light postion
+set(pLgt,'Position',xLgt_m(1:3).');
 
 %% Get list of all children
 kids = findall(axs);
