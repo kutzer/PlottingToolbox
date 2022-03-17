@@ -31,10 +31,19 @@ function im = simulateImage(axs,params,H_a2c)
 %
 %   See also plotCameraFOV
 %
+%   Application Notes:
+%       (1) Use light object(s) with the style property set to "local" for
+%           the most consistent lighting results between the simulation and
+%           simulated image.
+%
 %   Known Issues:
 %       (1) When using Camera Parameters that include non-zero distortion,
 %           objects close to the camera that are outside of the camera FOV
 %           appear in the foreground of the image.
+%       (2) When using Camera or Fisheye Parameters, faces of patch objects
+%           and line objects with points outside of the camera FOV are
+%           removed causing erroneous jagged edges and/or segments that are
+%           cut/removed
 %
 %   M. Kutzer, 18Feb2016, USNA
 
@@ -122,10 +131,16 @@ end
 % Existing light in current axes (adds light if no light exists)
 %
 % TODO - Consider checking if a light exists and only adding if one does
-lgt = addSingleLight(axs);
+lgt = findobj(axs,'Type','Light');
 
-% Light position relative to simulation axes frame
-pLgt_a = get(lgt,'Position').';
+% if isempty(lgt)
+%     noLight = true;
+% end
+
+for i = 1:numel(lgt)
+    % Light position relative to simulation axes frame
+    pLgt_a(:,i) = get(lgt(i),'Position').';
+end
 pLgt_a(4,:) = 1;
 
 % Define light position relative to camera frame
@@ -147,9 +162,10 @@ daspect(pAxs,[1,1,1]);
 xlim(pAxs,[0.5,0.5] + [0,hpix]);
 ylim(pAxs,[0.5,0.5] + [0,vpix]);
 
-pLgt = addSingleLight(pAxs);
-%set(pLgt,'Position',[1,0,1]);
+%pLgt = addSingleLight(pAxs);
+pLgt = copyobj(lgt,pAxs);
 
+%set(pLgt,'Position',[1,0,1]);
 % Match lighting position to simulation
 if useParams
     if isFisheye
@@ -168,15 +184,26 @@ if useParams
     end
 else
     % Use pinhole model ignoring distortion
-    sxLgt_m = A_c2m*pLgt_c;
+    sxLgt_m = A_c2m*pLgt_c(1:3,:);
     % Account for scaling
     z_c = sxLgt_m(3,:);
     xLgt_m = sxLgt_m./repmat(z_c,3,1);
 end
 % Append artificial depth
 xLgt_m(3,:) = z_c;
+
 % Set light postion
-set(pLgt,'Position',xLgt_m(1:3).');
+for i = 1:numel(lgt)
+    switch lower( get(lgt(i),'Style') )
+        case 'infinite'
+            set(pLgt(i),'Position',norm(pLgt_a(1:3,i))*(xLgt_m(1:3,i).')./norm(xLgt_m(1:3,i)) );
+        case 'local'
+            set(pLgt(i),'Position',xLgt_m(1:3,i).');
+        otherwise
+            warning('Unexpected light object property "%s", using default position.');
+            set(pLgt(i),'Position',norm(pLgt_a(1:3,i))*(xLgt_m(1:3,i).')./norm(xLgt_m(1:3,i)) );
+    end
+end
 
 %% Get list of all children
 kids = findall(axs);
