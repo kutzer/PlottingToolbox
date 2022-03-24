@@ -32,11 +32,12 @@ function varargout = PlottingToolboxVer
 %   17Mar2022 - Updated simulateImage to remove points outside FOV (see
 %               "Known Issues") and incorporated common lighting between
 %               the simulation and simulated image
+%   24Mar2022 - Added try/catch in plotCameraFOV
 
 A.Name = 'Plotting Toolbox';
-A.Version = '1.1.3';
+A.Version = '1.1.4';
 A.Release = '(R2020b)';
-A.Date = '17-Mar-2022';
+A.Date = '24-Mar-2022';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);
