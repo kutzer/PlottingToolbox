@@ -26,6 +26,7 @@ function p = plotCameraFOV(varargin)
 
 % Updates
 %   15Mar2022 - Added cameraParams input support
+%   24Mar2022 - Added try/catch for pointsToWorld usage
 
 % TODO - accept cameraParams as an input instead of intrinsic matrix A_c2m
 
@@ -149,10 +150,23 @@ if isempty(A_c2m)
         z_c = s_all(i);
 
         % Define points x/y coordinates relative to camera frame
-        X_c = pointsToWorld(...
-            intrinsics,...                  % "Intrinsics" parameter
-            rigid3d(eye(3),[0,0,z_c]),...   % Tranlate along camera z
-            X_pix);                         % Pixel coordinates
+        try
+            % 3-Input Syntax
+            % pointsToWorld(intrinsics,rigid3d,X_pix)
+            X_c = pointsToWorld(...
+                intrinsics,...                  % "Intrinsics" parameter
+                rigid3d(eye(3),[0,0,z_c]),...   % Tranlate along camera z
+                X_pix);                         % Pixel coordinates
+        catch
+            % 4-Input Syntax
+            % pointsToWorld(intrinsics,rot,tran,X_pix)
+            X_c = pointsToWorld(...
+                intrinsics,...                  % "Intrinsics" parameter
+                eye(3),...                      % No rotation
+                [0,0,z_c],...                   % Tranlate along camera z
+                X_pix);                         % Pixel coordinates
+        end
+
         % Append z-coordinate
         X_c(:,3) = z_c; % 
 
