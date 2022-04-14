@@ -14,9 +14,27 @@ function [hg, ptc] = plotCheckerboard(varargin)
 %   [___] = plotCheckerboard(axs,___) allows the user to 
 %   specify the axes or parent of the checkerboard representation.
 %
-%   See also detectCheckerboardPoints
+%   Input(s)
+%                axs - parent object for the checkerboard, default value is
+%                      axs = gca
+%          boardSize - 1x2 array defining checkerboard size 
+%                      (see detectCheckerboardPoints)
+%         squareSize - scalar array defining the size of checkerboard
+%                      squares, e.g. 10mm (see generateCheckerboardPoints)
+%       squareColors - 1x2 cell array containing the checkerboard. Elements
+%                      of squareColors can be specified as a valid color
+%                      character or an rgb triplet.
+%
+%   Output(s)
+%        hg - hgtransform object parent of the checkerboard patch objects
+%       ptc - patch objects visualizing the checkerboard
+%
+%   See also detectCheckerboardPoints generateCheckerboardPoints
 %
 %   M. Kutzer, USNA, 04Sep2019
+
+% Updates
+%   14Apr2022 - Updated documentation
 
 %% Check/parse inputs 
 % TODO - check inputs and better check number of inputs
