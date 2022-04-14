@@ -37,6 +37,7 @@ function [hg, ptc] = plotCheckerboard(varargin)
 % Updates
 %   14Apr2022 - Updated documentation
 %   14Apr2022 - Updated input parsing and added input checking
+%   14Apr2022 - Deleted copyobj patch after use
 
 %% Parse inputs and set defaults 
 % TODO - check inputs and better check number of inputs
@@ -132,3 +133,4 @@ for i = 1:boardSize(2)      % boxes in x-direction
         end
     end
 end
+delete(p0);
