@@ -17,10 +17,11 @@ function [hg, ptc] = plotCheckerboard(varargin)
 %   Input(s)
 %                axs - parent object for the checkerboard, default value is
 %                      axs = gca
-%          boardSize - 1x2 array defining checkerboard size 
-%                      (see detectCheckerboardPoints)
-%         squareSize - scalar array defining the size of checkerboard
-%                      squares, e.g. 10mm (see generateCheckerboardPoints)
+%          boardSize - 1x2 array of positive integer values defining 
+%                      checkerboard size (see detectCheckerboardPoints)
+%         squareSize - positive scalar value defining the size of a single 
+%                      checkerboard squares, e.g. 10mm 
+%                      (see generateCheckerboardPoints)
 %       squareColors - 1x2 cell array containing the checkerboard. Elements
 %                      of squareColors can be specified as a valid color
 %                      character or an rgb triplet.
@@ -35,27 +36,51 @@ function [hg, ptc] = plotCheckerboard(varargin)
 
 % Updates
 %   14Apr2022 - Updated documentation
+%   14Apr2022 - Updated input parsing and added input checking
 
-%% Check/parse inputs 
+%% Parse inputs and set defaults 
 % TODO - check inputs and better check number of inputs
 narginchk(2,4);
 
 idx0 = 1;
-if ishandle(varargin{1})
+% Check if parent was provided
+if numel(varargin{1}) == 1 && ishandle(varargin{1}(1))
     mom = varargin{1};
     idx0 = idx0 + 1;
 else
     mom = gca;
 end
 
-boardSize = varargin{idx0};
+boardSize  = varargin{idx0};
 squareSize = varargin{idx0 + 1};
 
-%% Set defaults
+% Define square colors
 if nargin > (idx0+1)
     squareColors = varargin{idx0 + 2};
 else
     squareColors = {'k','w'};
+end
+
+%% Check inputs
+switch lower( get(mom,'Type') )
+    case 'axes'
+        % Acceptable parent
+    case 'hgtransform'
+        % Acceptable parent
+    otherwise
+        error('Specified parent must be a valid axes or hgtransform object.');
+end
+
+if numel(boardSize) ~= 2 || nnz(boardSize == round(abs(boardSize))) ~= numel(boardSize)
+    error('Board size must be specified as a two element array containing positive integers.');
+end
+
+if numel(squareSize) ~= 1 || squareSize ~= abs(squareSize)
+    error('Square size must be defined as a positive scalar.');
+end
+
+if ~iscell(squareColors) || numel(squareColors) ~= 2
+    error('Square colors must be defined as a 2-element cell array.');
 end
 
 %% Create base frame
