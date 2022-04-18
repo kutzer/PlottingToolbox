@@ -34,11 +34,12 @@ function varargout = PlottingToolboxVer
 %               the simulation and simulated image
 %   24Mar2022 - Added try/catch in plotCameraFOV
 %   14Apr2022 - Documentation update and bug fixed for plotCheckerboard
+%   18Apr2022 - Updated simulateAprilTag
 
 A.Name = 'Plotting Toolbox';
-A.Version = '1.1.5';
+A.Version = '1.1.6';
 A.Release = '(R2020b)';
-A.Date = '14-Apr-2022';
+A.Date = '18-Apr-2022';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);
