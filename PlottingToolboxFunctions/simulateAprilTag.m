@@ -40,6 +40,9 @@ function tagInfo = simulateAprilTag(tagFamily,tagID,tagSize)
 %
 %   M. Kutzer, 14Mar2022, USNA
 
+% Updates
+%   18Apr2022 - Corrected tagFname generation using regexp tokens
+
 debugOn = false;
 
 %% Check input(s)
@@ -147,14 +150,43 @@ if exist(tagPath,'dir') ~= 7
     error('Unable to locate "%s" directory.',tagFolder);
 end
 
+%% Define available families
+% Get a list of all files and folders in tag path
+files = dir(tagPath);
+% Define all directories
+tf_dir = [files.isdir];
+% Show tag families
+tagFamilies = {files(tf_dir).name};
+% Isolate families only
+tf_fam = ~contains(tagFamilies,'.');
+tagFamilies = tagFamilies(tf_fam);
+
 %% Define pathname and filename
 % Pathname
 tagPname = fullfile(tagPath,tagFamily);
 % Filename
-idx = strfind(tagFamily,'h');
-tagFname = sprintf('tag%s_%s_%05d.png',...
-    tagFamily((idx-2):(idx-1)),tagFamily((idx+1):end),tagID);
+%idx = strfind(tagFamily,'h');
+%tagFname = sprintf('tag%s_%s_%05d.png',...
+%    tagFamily((idx-2):(idx-1)),tagFamily((idx+1):end),tagID);
+expression = '(\d+)';
+tokens = regexp(tagFamily, expression, 'tokens');
+if numel(tokens) == 2
+    val(1) = str2double(tokens{1}{1});
+    val(2) = str2double(tokens{2}{1});
+else
+    str = sprintf('Unexpected tag family name "%s".\n\nAvailable families:\n',tagFamily);
+    fams = sprintf('\t%s\n',tagFamilies{:});
+    error('%s%s',str,fams);
+end
+tagFname = sprintf('tag%02d_%02d_%05d.png',val(1),val(2),tagID);
 
+%% Confirm tag exists
+if exist(fullfile(tagPname,tagFname),'file') ~= 2
+    str = sprintf('Unexpected tag family name "%s".\n\nAvailable families:\n',tagFamily);
+    fams = sprintf('\t%s\n',tagFamilies{:});
+    error('%s%s',str,fams);
+end
+    
 %% Read tag
 im = imread( fullfile(tagPname,tagFname) );
 im = rgb2gray(im);
