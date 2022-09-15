@@ -32,7 +32,7 @@ function [hg,ptc,cInfo] = plotCheckerboard(varargin)
 %     cInfo - structured array containing checkerboard information
 %       cInfo.BoardSize  - 1x2 array defining board size
 %       cInfo.SquareSize - scalar value defining square size
-%       cInfo.Boundary   - 4x2 array containing the x/y bounding box of the
+%       cInfo.Location   - 4x2 array containing the x/y bounding box of the
 %                          checkerboard
 %
 %   See also detectCheckerboardPoints generateCheckerboardPoints
@@ -151,7 +151,7 @@ if nargout > 2
 
     cInfo.BoardSize  = boardSize;
     cInfo.SquareSize = squareSize;
-    cInfo.Boundary   = [...
+    cInfo.Location   = [...
         xx(1), yy(1);...
         xx(1), yy(2);...
         xx(2), yy(2);...
