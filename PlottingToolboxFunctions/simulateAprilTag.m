@@ -42,6 +42,8 @@ function tagInfo = simulateAprilTag(tagFamily,tagID,tagSize)
 
 % Updates
 %   18Apr2022 - Corrected tagFname generation using regexp tokens
+%   21Sep2022 - Replaced tagPathFile calls with 
+%               fullfile(userpath,tagPathFile)
 
 debugOn = false;
 
@@ -69,9 +71,9 @@ if exist(tagPath,'dir') == 7
     % apriltag-imgs appears to exist in the current user path
 else
     tagPath = [];
-    if exist(tagPathFile,'file') == 2
+    if exist( fullfile(userpath,tagPathFile),'file') == 2
         try
-            load( tagPathFile,'tagPath')
+            load( fullfile(userpath,tagPathFile),'tagPath' )
         catch
             % Unable to load
         end
@@ -94,7 +96,7 @@ if exist(tagPath,'dir') ~= 7
                 tagPath = selpath;
                 downloadTags = false;
                 % TODO - check selected path
-                save( fullfile(userpath,tagPathFile),'tagPath');
+                save( fullfile(userpath,tagPathFile),'tagPath' );
             end
         case 'No'
             % Download apriltags-imgs
