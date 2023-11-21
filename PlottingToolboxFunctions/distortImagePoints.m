@@ -14,6 +14,9 @@ function Xd = distortImagePoints(Xu,params)
 %           Xd = [xd_1,xd_2,...;
 %                 yd_1,yd_2,...];  
 %
+%   NOTE: This function is not a 1:1 match for undistortImagePoints. There
+%         is still an issue with implementation. 
+%
 % References
 %   [1] https://www.mathworks.com/help/vision/ug/camera-calibration.html
 %
@@ -44,19 +47,22 @@ P  = params.TangentialDistortion;
 Xn = (Xu - Xo.')./F.';
 Rn = sqrt(sum(Xn.^2,1));
 
-%% Calculate tangential distortion
-if numel(P) < 2
-    P(2) = 0;
-end
-Xt(1,:) = Xn(1,:) + (2*P(1)*Xn(1,:).*Xn(2,:) + P(2)*(Rn.^2 + 2*Xn(1,:).^2));
-Xt(2,:) = Xn(2,:) + (P(1)*(Rn.^2 + 2*Xn(2,:).^2) + 2*P(2)*Xn(1,:).*Xn(2,:));
-
 %% Calculate radial distortion
 if numel(K) < 3
     K(3) = 0;
 end
-Xr(1,:) = Xt(1,:).*(1+K(1)*Rn.^2 + K(2)*Rn.^4 + K(3)*Rn.^6);
-Xr(2,:) = Xt(2,:).*(1+K(1)*Rn.^2 + K(2)*Rn.^4 + K(3)*Rn.^6);
+Xr(1,:) = Xn(1,:).*(1 + K(1)*Rn.^2 + K(2)*Rn.^4 + K(3)*Rn.^6);
+Xr(2,:) = Xn(2,:).*(1 + K(1)*Rn.^2 + K(2)*Rn.^4 + K(3)*Rn.^6);
+
+%% Calculate tangential distortion
+if numel(P) < 2
+    P(2) = 0;
+end
+Xt(1,:) = Xr(1,:) + (2*P(1)*Xn(1,:).*Xn(2,:) + P(2)*(Rn.^2 + 2*Xn(1,:).^2));
+Xt(2,:) = Xr(2,:) + (P(1)*(Rn.^2 + 2*Xn(2,:).^2) + 2*P(2)*Xn(1,:).*Xn(2,:));
+
+%% Package output
+Xd = Xu + Xt;
 
 return
 %% --- Old method ---
