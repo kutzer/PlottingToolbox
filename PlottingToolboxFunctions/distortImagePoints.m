@@ -1,46 +1,72 @@
 function Xd = distortImagePoints(Xu,params)
 % DISTORTIMAGEPOINTS calculate distorted image points using the
 % classical lens distortion model.
+%   Xd = distortImagePoints(Xu,params)
 %
-%   Inputs:
+%   Input(s)
 %           Xu - undistorted image points
 %               Xu = [xu_1,xu_2,...;
 %                     yu_1,yu_2,...];
 %       params - MATLAB camera parameters structured array
-%                Xc - center of distortion
-%                 K - 1xN array containing radial distortion coefficients
-%                 P - 1xM array containing tangential distortion coefficients
-%   Outputs:
+%
+%   Output(s)
 %       Xd - distorted image points
 %           Xd = [xd_1,xd_2,...;
-%                 yd_1,yd_2,...]; 
-%   
-
+%                 yd_1,yd_2,...];  
 %
 % References
-%   [1] https://en.wikipedia.org/wiki/Distortion_(optics)
-%   [2] J.P. de Villiers, F.W. Leuschner, R. Geldenhuys, "Centi-pixel
+%   [1] https://www.mathworks.com/help/vision/ug/camera-calibration.html
+%
+%   [2] https://www.tangramvision.com/blog/camera-modeling-exploring-distortion-and-distortion-models-part-ii
+%
+%   [3] https://en.wikipedia.org/wiki/Distortion_(optics)
+%
+%   [4] J.P. de Villiers, F.W. Leuschner, R. Geldenhuys, "Centi-pixel
 %   accurate real-time inverse distortion correction," SPIE Vol 7266, 2008.
-%   *NOTE: [2] contains a typo in Eq. 1, (xu,yu) appears to be switched
+%
+%   *NOTE: [4] contains a typo in Eq. 1, (xu,yu) appears to be switched
 %   with (xd,yd)
 %
-%   M. Kutzer 21July2015, USNA
+%   M. Kutzer, 21July2015, USNA
 
 % Updates
 %   18Feb2016 - Updated to accept and parse MATLAB camera parameters
+%   21Nov2023 - Updated to follow MATLAB documentation
 
 %% Parse camera parameters
-A_C2M = transpose( params.IntrinsicMatrix );
-Xc = params.PrincipalPoint;
+%A_c2m = transpose( params.IntrinsicMatrix );
+Xo = params.PrincipalPoint;
+F  = params.FocalLength;
 K  = params.RadialDistortion;
 P  = params.TangentialDistortion;
 
+%% Define normalized image coordinates
+Xn = (Xu - Xo.')./F.';
+Rn = sqrt(sum(Xn.^2,1));
+
+%% Calculate tangential distortion
+if numel(P) < 2
+    P(2) = 0;
+end
+Xt(1,:) = Xn(1,:) + (2*P(1)*Xn(1,:).*Xn(2,:) + P(2)*(Rn.^2 + 2*Xn(1,:).^2));
+Xt(2,:) = Xn(2,:) + (P(1)*(Rn.^2 + 2*Xn(2,:).^2) + 2*P(2)*Xn(1,:).*Xn(2,:));
+
+%% Calculate radial distortion
+if numel(K) < 3
+    K(3) = 0;
+end
+Xr(1,:) = Xt(1,:).*(1+K(1)*Rn.^2 + K(2)*Rn.^4 + K(3)*Rn.^6);
+Xr(2,:) = Xt(2,:).*(1+K(1)*Rn.^2 + K(2)*Rn.^4 + K(3)*Rn.^6);
+
+return
+%% --- Old method ---
+
 %% Convert points to camera frame
 % TODO - validate this method
-Xc(3,:) = 1;
-Xc = (A_C2M)^(-1)*Xc;
+Xo(3,:) = 1;
+Xo = (A_c2m)^(-1)*Xo;
 Xu(3,:) = 1;
-Xu = (A_C2M)^(-1)*Xu;
+Xu = (A_c2m)^(-1)*Xu;
 
 %% Distort points
 %TODO - check dimensions of inputs
@@ -51,8 +77,8 @@ P = reshape(P,1,[]);
 
 xu = Xu(1,:);
 yu = Xu(2,:);
-xc = Xc(1);
-yc = Xc(2);
+xc = Xo(1);
+yc = Xo(2);
 
 xuc = bsxfun(@minus,xu,xc);
 yuc = bsxfun(@minus,yu,yc);
@@ -90,5 +116,5 @@ Xd = [xd; yd];
 
 %% Project distorted points back to matrix frame
 Xd(3,:) = 1;
-Xd = A_C2M*Xd;
+Xd = A_c2m*Xd;
 Xd(3,:) = [];
