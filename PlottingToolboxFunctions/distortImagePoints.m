@@ -1,4 +1,4 @@
-function Xd = distortImagePoints(Xu,params)
+function [Xd,axs] = distortImagePoints(Xu,params)
 % DISTORTIMAGEPOINTS calculate distorted image points using the
 % classical lens distortion model.
 %   Xd = distortImagePoints(Xu,params)
@@ -12,10 +12,10 @@ function Xd = distortImagePoints(Xu,params)
 %   Output(s)
 %       Xd - distorted image points
 %           Xd = [xd_1,xd_2,...;
-%                 yd_1,yd_2,...];  
+%                 yd_1,yd_2,...];
 %
 %   NOTE: This function is not a 1:1 match for undistortImagePoints. There
-%         is still an issue with implementation. 
+%         is still an issue with implementation.
 %
 % References
 %   [1] https://www.mathworks.com/help/vision/ug/camera-calibration.html
@@ -36,33 +36,119 @@ function Xd = distortImagePoints(Xu,params)
 %   18Feb2016 - Updated to accept and parse MATLAB camera parameters
 %   21Nov2023 - Updated to follow MATLAB documentation
 
+debugOn = true;
+
+%% Check input(s)
+% TODO - check input(s)
+
+%% Create debug plots
+if debugOn
+    fig = figure('Name','distortImagePoints.m, debugOn = true');
+    axs(1) = subplot(1,2,1,'Parent',fig);
+    axs(2) = subplot(1,2,2,'Parent',fig);
+    set(axs,'NextPlot','add','DataAspectRatio',[1 1 1],'YDir','Reverse');
+
+    xlabel(axs(1),'x (pixels)');
+    ylabel(axs(1),'y (pixels)');
+
+    xlabel(axs(2),'x (normalized image coordinates)');
+    ylabel(axs(2),'y (normalized image coordinates)');
+else
+    axs = [];
+end
+
 %% Parse camera parameters
-%A_c2m = transpose( params.IntrinsicMatrix );
+A_c2m = ( params.IntrinsicMatrix ).';
+A_m2c = ( A_c2m )^(-1);
 Xo = params.PrincipalPoint;
-F  = params.FocalLength;
+%F  = params.FocalLength;
 K  = params.RadialDistortion;
 P  = params.TangentialDistortion;
 
+%% Plot original points and principal point
+if debugOn
+    plt_Xu = plot(axs(1),Xu(1,:),Xu(2,:),'xr','Tag','Undistorted Points');
+    for i = 1:size(Xu,2)
+        txt_Xu(i) = text(Xu(1,i),Xu(2,i),sprintf('$x_{%d}$',i),...
+            'Parent',axs(1),'Interpreter','latex','VerticalAlignment','top',...
+            'HorizontalAlignment','left','FontSize',12,'Tag','Undistorted Point Labels');
+    end
+
+    plt_Xo = plot(axs(1),Xo(:,1),Xo(:,2),'+g','Tag','Principal Point');
+end
+
 %% Define normalized image coordinates
-Xn = (Xu - Xo.')./F.';
+Xu(3,:) = 1;
+Xn = A_m2c*Xu;
+Xu(3,:) = [];
+Xn(3,:) = [];
+%Xn = (Xu - Xo.')./F.';
 Rn = sqrt(sum(Xn.^2,1));
+
+if debugOn
+    plt_bXn = plot(axs(2),Xn(1,:),Xn(2,:),'xr','Tag','Normalized Points');
+    for i = 1:size(Xn,2)
+        txt_bXn(i) = text(Xn(1,i),Xn(2,i),sprintf('$\\bar{x}_{%d}$',i),...
+            'Parent',axs(2),'Interpreter','latex','VerticalAlignment','top',...
+            'HorizontalAlignment','left','FontSize',12,'Tag','Normalized Point Labels');
+
+        %r_bXn(i) = plot(axs(2),[0,Xn(1,i)],[0,Xn(2,i)],':k','Tag','Normalized Radius');
+        if ~isZero( Rn(i) - norm(Xn(:,i)) )
+            fprintf('%f ~= %f for i = %d\n',Rn(i),norm(Xn(:,i)),i);
+        end
+    end
+
+    plt_bXo = plot(axs(2),0,0,'+g','Tag','Principal Point');
+end
 
 %% Calculate radial distortion
 if numel(K) < 3
     K(3) = 0;
 end
-Xr(1,:) = Xn(1,:).*(1 + K(1)*Rn.^2 + K(2)*Rn.^4 + K(3)*Rn.^6);
-Xr(2,:) = Xn(2,:).*(1 + K(1)*Rn.^2 + K(2)*Rn.^4 + K(3)*Rn.^6);
-
+%Xr(1,:) = Xn(1,:).*(1 + K(1)*Rn.^2 + K(2)*Rn.^4 + K(3)*Rn.^6);
+%Xr(2,:) = Xn(2,:).*(1 + K(1)*Rn.^2 + K(2)*Rn.^4 + K(3)*Rn.^6);
+delta_r(1,:) = (1 + K(1)*Rn.^2 + K(2)*Rn.^4 + K(3)*Rn.^6);
+delta_r(2,:) = (1 + K(1)*Rn.^2 + K(2)*Rn.^4 + K(3)*Rn.^6);
 %% Calculate tangential distortion
 if numel(P) < 2
     P(2) = 0;
 end
-Xt(1,:) = Xr(1,:) + (2*P(1)*Xn(1,:).*Xn(2,:) + P(2)*(Rn.^2 + 2*Xn(1,:).^2));
-Xt(2,:) = Xr(2,:) + (P(1)*(Rn.^2 + 2*Xn(2,:).^2) + 2*P(2)*Xn(1,:).*Xn(2,:));
+%Xt(1,:) = Xn(1,:) + (2*P(1)*Xn(1,:).*Xn(2,:) + P(2)*(Rn.^2 + 2*Xn(1,:).^2));
+%Xt(2,:) = Xn(2,:) + (P(1)*(Rn.^2 + 2*Xn(2,:).^2) + 2*P(2)*Xn(1,:).*Xn(2,:));
+delta_t(1,:) = (2*P(1)*Xn(1,:).*Xn(2,:) + P(2)*(Rn.^2 + 2*Xn(1,:).^2));
+delta_t(2,:) = (P(1)*(Rn.^2 + 2*Xn(2,:).^2) + 2*P(2)*Xn(1,:).*Xn(2,:));
 
 %% Package output
-Xd = Xu + Xt;
+% Calculate normalized distortion
+Xd = (Xn + delta_t).*delta_r;
+
+if debugOn
+    plt_bXd = plot(axs(2),Xd(1,:),Xd(2,:),'+b',...
+        'Tag','Distorted Normalized Points');
+    for i = 1:size(Xd,2)
+        txt_bXd(i) = text(Xd(1,i),Xd(2,i),sprintf('$\\tilde{x}_{%d}$',i),...
+            'Parent',axs(2),'Interpreter','latex','VerticalAlignment','bottom',...
+            'HorizontalAlignment','right','FontSize',12,...
+            'Tag','Distorted Normalized Point Labels');
+    end
+end
+
+% Re-scale
+Xd(3,:) = 1;
+Xd = A_c2m*Xd;
+Xd(3,:) = [];
+%Xd = Xd.*F.' + Xo.';
+
+if debugOn
+    plt_Xd = plot(axs(1),Xd(1,:),Xd(2,:),'+b',...
+        'Tag','Distorted Normalized Points');
+    for i = 1:size(Xd,2)
+        txt_Xd(i) = text(Xd(1,i),Xd(2,i),sprintf('$\\tilde{x}_{%d}$',i),...
+            'Parent',axs(1),'Interpreter','latex','VerticalAlignment','bottom',...
+            'HorizontalAlignment','right','FontSize',12,...
+            'Tag','Distorted Normalized Point Labels');
+    end
+end
 
 return
 %% --- Old method ---
@@ -114,7 +200,7 @@ yd = yu + yuc.*(K*rN) + ...
 %Wiki
 % xd = xu.*(K*rN) + ...
 %     ( P(2)*(r.^2 + 2*xu.^2) + 2*P(1)*xu.*yu ).*bsxfun(@plus,1,P(3:M)*rM);
-% 
+%
 % yd = yu.*(K*rN) + ...
 %     ( P(1)*(r.^2 + 2*yu.^2) + 2*P(2)*xu.*yu ).*bsxfun(@plus,1,P(3:M)*rM);
 
