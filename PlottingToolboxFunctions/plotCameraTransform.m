@@ -41,6 +41,8 @@ function camVis = plotCameraTransform(h_c2x,varargin)
 %       c_Vis = plotCameraTransform(h_c2axs,'Size',camScale/2,...
 %           'Color',[0,0,1]);
 %
+%   See also plotCamera
+%
 %   M. Kutzer, 02Dec2023, USNA
 
 %% Check input(s)
