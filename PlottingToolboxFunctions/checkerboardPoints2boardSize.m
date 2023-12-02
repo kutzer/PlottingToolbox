@@ -10,6 +10,8 @@ function [boardSize,squareSize] = checkerboardPoints2boardSize(worldPoints)
 %        boardSize - 1x2 array defining checkerboard size
 %       squareSize - scalar defining square size
 %
+%   See also generateCheckerboardPoints
+%
 %   M. Kutzer, 02Dec2023, USNA
 
 %% Check input(s)
