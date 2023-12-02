@@ -22,9 +22,9 @@ function [hg,ptc,cInfo] = plotCheckerboard(varargin)
 %         squareSize - positive scalar value defining the size of a single 
 %                      checkerboard squares, e.g. 10mm 
 %                      (see generateCheckerboardPoints)
-%       squareColors - 1x2 cell array containing the checkerboard. Elements
-%                      of squareColors can be specified as a valid color
-%                      character or an rgb triplet.
+%       squareColors - 1x2 cell array containing the color of checkerboard 
+%                      squares. Elements of squareColors can be specified 
+%                      as a valid color character or an rgb triplet.
 %
 %   Output(s)
 %        hg - hgtransform object parent of the checkerboard patch objects
