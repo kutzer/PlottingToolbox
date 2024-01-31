@@ -22,6 +22,7 @@ function g = gifwait(varargin)
 %               break
 %           end
 %       end
+%       delete(g.fig);
 %
 %   M. Kutzer, 20Mar2020, USNA
 
