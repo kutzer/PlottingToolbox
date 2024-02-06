@@ -35,6 +35,7 @@ function varargout = PlottingToolboxVer
 %   24Mar2022 - Added try/catch in plotCameraFOV
 %   14Apr2022 - Documentation update and bug fixed for plotCheckerboard
 %   18Apr2022 - Updated simulateAprilTag
+%   06Feb2024 - Added projectWithFalseDepth
 
 A.Name = 'Plotting Toolbox';
 A.Version = '1.1.6';
