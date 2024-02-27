@@ -14,20 +14,40 @@ function g = gifwait(varargin)
 %   g = GIFWAIT(g) updates the gif based on the time that has passed
 %   between calls of GIFWAIT.
 %
-%   Example:
-%       g = gifwait(0,'Please wait...');
+%   Example 1:
+%       g = gifwait(0,'Please wait...[CLOSE WHEN FINISHED]');
 %       while true
 %           g = gifwait(g);
 %           if isempty(g)
 %               break
 %           end
 %       end
+%       %delete(g.fig); % <--- This is excluded because the user closed the figure
+%
+%
+%   Example 2:
+%       g = gifwait(0,'Please wait...');
+%       dt = seconds(5);
+%       t0 = datetime('now');
+%       while true
+%           g = gifwait(g);
+%           if isempty(g)
+%               fprintf('GIF closed by user.\n');
+%               break
+%           end
+%           if (datetime('now') - t0) > dt
+%               fprintf('GIF wait finished.\n');
+%               break
+%           end
+%       end
 %       delete(g.fig);
+%
 %
 %   M. Kutzer, 20Mar2020, USNA
 
 % Updates:
 %   01Apr2021 - Updated for new imread syntax (name/value pair)
+%   27Feb2024 - Updated to improve random selection of default gifs
 
 %% Parse inputs
 narginchk(1,2)
@@ -38,7 +58,8 @@ if nargin == 2
         filename = varargin{1};
     elseif isscalar(varargin{1})
         if varargin{1} == 0
-            i = randi(4);
+            %i = randi(4);
+            i = randiNew(4);
         elseif varargin{1} > 0 && varargin{1} < 5
             i = varargin{1};
         else
@@ -86,6 +107,12 @@ if nargin == 2
 end
 
 g = varargin{1};
+if ~isstruct(g)
+warning('The gif has been closed. Please reinitialize...');
+    g = [];
+    return;
+end
+
 if isempty(g) || ~ishandle(g.fig)
     warning('The gif has been closed. Please reinitialize...');
     g = [];
@@ -101,3 +128,27 @@ frame = mod(round(dt * g.fps),g.nFrames) + 1;   % define current frame
 
 set(g.img,'CData',g.im(:,:,1,frame));
 drawnow;
+
+end
+
+%% Internal function(s)
+
+% -------------------------------------------------------------------------
+function valOut = randiNew(valIn)
+
+% Generate scalar random number using rand.m
+rA = rand(1,1);
+
+% Generate scalar random-ish number based on seconds elapsed
+tf = datetime('now');
+t0 = dateshift(tf, 'start', 'minute');
+dt = tf - t0;
+rB = seconds(dt)/60;
+
+% Combine values
+r = mean([rA,rB]);
+
+% Define output
+valOut = round(valIn*r);
+
+end
