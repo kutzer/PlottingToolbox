@@ -17,6 +17,9 @@ function [tf,msg] = isPatch(ptc)
 %
 %   M. Kutzer, 06Feb2024, USNA
 
+% Update(s)
+%   05Mar2024 - Made patch check for patch objects faster.
+
 %% Check input(s)
 narginchk(1,1);
 
@@ -24,6 +27,23 @@ narginchk(1,1);
 if isempty(ptc)
     tf = false;
     msg{1} = 'Invalid Patch - Input is empty.';
+    return
+end
+
+%% Check if the object is a handle
+tf_a = ishandle(ptc);
+if any(tf_a)
+    % Initialize handles cell array
+    hndlType = cell( size(ptc) );
+    hndlType(:) = {''};
+    hndlType(tf_a) = get(ptc(tf_a),'Type');
+    tf = matches(hndlType,'patch');
+    
+    if nargout > 1
+        msg = cell(size(ptc));
+        msg(:) = {''};
+        msg(~tf) = {'Handle is not a valid patch object.'};
+    end
     return
 end
 
