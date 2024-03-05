@@ -36,7 +36,8 @@ if any(tf_a)
     % Initialize handles cell array
     hndlType = cell( size(ptc) );
     hndlType(:) = {''};
-    hndlType(tf_a) = get(ptc(tf_a),'Type');
+    %hndlType(tf_a) = get(ptc(tf_a),'Type');
+    hndlType(tf_a) = ptc(tf_a).Type;
     tf = matches(hndlType,'patch');
     
     if nargout > 1

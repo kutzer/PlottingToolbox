@@ -130,6 +130,10 @@ if ~tfPatch
     
     % Package output(s)
     varargout{1} = p_m_falseDepth;
+    
+    if ~tfPlot
+        return
+    end
 end
 
 %% Project patch objects
@@ -155,6 +159,10 @@ if tfPatch
     
     % Package output(s)
     varargout{1} = ptc_m;
+    
+    if ~tfPlot
+        return
+    end
 end
 
 %% Plot (if applicable)
