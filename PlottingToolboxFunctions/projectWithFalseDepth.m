@@ -186,5 +186,5 @@ function [p_m,tilde_p_m,maxTilde_z_m] = projPnts(p_f,P_f2m)
     
     p_m = tilde_p_m./tilde_p_m(3,:);
     
-    maxTilde_z_m = max(tilde_p_m(3,:);
+    maxTilde_z_m = max(tilde_p_m(3,:));
 end
