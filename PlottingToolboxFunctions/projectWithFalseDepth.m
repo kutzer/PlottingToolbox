@@ -47,37 +47,36 @@ function varargout = projectWithFalseDepth(p_f,P_f2m,varargin)
 %% Parse input(s)
 narginchk(2,3);
 
-% Check for patch input
 tfPatch = false;
-tfChk = isPatch(p_f);
-if any( tfChk )
-    
-    % Define valid patch objects
-    ptc_f = p_f(tfChk);
-    
-    % Display ignored elements to user
-    if any( ~tfChk )
-        for i = find(~tfChk)
-            fprintf('Ignoring element %d - ptc_f(%d) is not a valid patch object.\n',i,i);
+switch class(p_b)
+    case 'double'
+        if size(p_f,1) == 4
+            p_f = p_f(1:3,:);
         end
-    end
-    
-    % Update point(s)
-    p_f = [];
-    tfPatch = true;
-end
-
-% Check points input
-if ~tfPatch
-    if size(p_f,1) == 4
-        p_f = p_f(1:3,:);
-    end
-    if size(p_f,1) ~= 3
-        error('3D points ("p_f") must be defined as a 3xN array.');
-    end
-    
-    % Update patch
-    ptc_f = [];
+        if size(p_f,1) ~= 3
+            error('3D points ("p_f") must be defined as a 3xN array.');
+        end
+        
+        % Update patch
+        ptc_f = [];
+    otherwise
+        % Check for patch input
+        tfChk = isPatch(p_f);
+        if any( tfChk )
+            % Define valid patch objects
+            ptc_f = p_f(tfChk);
+            
+            % Display ignored elements to user
+            if any( ~tfChk )
+                for i = find(~tfChk)
+                    fprintf('Ignoring element %d - ptc_f(%d) is not a valid patch object.\n',i,i);
+                end
+            end
+            
+            % Update point(s)
+            p_f = [];
+            tfPatch = true;
+        end
 end
 
 % Check projection matrix
