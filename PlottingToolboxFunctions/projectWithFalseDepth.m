@@ -48,7 +48,7 @@ function varargout = projectWithFalseDepth(p_f,P_f2m,varargin)
 narginchk(2,3);
 
 tfPatch = false;
-switch class(p_b)
+switch class(p_f)
     case 'double'
         if size(p_f,1) == 4
             p_f = p_f(1:3,:);
