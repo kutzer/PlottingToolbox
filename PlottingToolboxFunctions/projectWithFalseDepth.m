@@ -43,6 +43,7 @@ function varargout = projectWithFalseDepth(p_f,P_f2m,varargin)
 
 % Update(s)
 %   06Feb2024 - Updated to parse and check inputs
+%   05Mar2024 - Updated to speed up projection of points
 
 %% Parse input(s)
 narginchk(2,3);
