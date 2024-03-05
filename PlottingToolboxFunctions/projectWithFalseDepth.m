@@ -8,7 +8,8 @@ function varargout = projectWithFalseDepth(p_f,P_f2m,varargin)
 %   [p_m,obj_m] = projectWithFalseDepth(p_f,P_f2m,axs)
 %
 %   Input(s)
-%       p_f   - 3xN array of points defined relative to a given frame f
+%       p_f   - 3xN array of points defined relative to a given frame f or
+%               4xN array of homogeneous points defined relative to frame f
 %       P_f2m - 3x4 projection matrix relating frame f to the matrix frame
 %               (frame m)
 %       axs   - [OPTIONAL] desired parent graphics for new patch objects
@@ -68,6 +69,9 @@ end
 
 % Check points input
 if ~tfPatch
+    if size(p_f,1) == 4
+        p_f = p_f(1:3,:);
+    end
     if size(p_f,1) ~= 3
         error('3D points ("p_f") must be defined as a 3xN array.');
     end
