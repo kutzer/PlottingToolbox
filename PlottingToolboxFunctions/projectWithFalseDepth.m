@@ -44,7 +44,6 @@ function varargout = projectWithFalseDepth(p_f,P_f2m,varargin)
 % Update(s)
 %   06Feb2024 - Updated to parse and check inputs
 %   05Mar2024 - Updated to speed up projection of points
-%   06Mar2024 - Updated to speed up projection of points
 
 %% Parse input(s)
 narginchk(2,3);
@@ -53,8 +52,7 @@ tfPatch = false;
 switch class(p_f)
     case 'double'
         if size(p_f,1) == 4
-            %p_f = p_f(1:3,:);
-            p_f(4,:) = [];
+            p_f = p_f(1:3,:);
         end
         if size(p_f,1) ~= 3
             error('3D points ("p_f") must be defined as a 3xN array.');
