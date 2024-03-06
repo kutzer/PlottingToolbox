@@ -127,8 +127,6 @@ if ~tfPatch
     
     % Add false depth
     p_m_falseDepth(3,:) = -tilde_p_m(3,:) + maxTilde_z_m;
-    %p_m_falseDepth(3,:) = -tilde_p_m(3,:) + ...
-    %    repmat(maxTilde_z_m,1,size(tilde_p_m,2));
     
     % Package output(s)
     varargout{1} = p_m_falseDepth;
