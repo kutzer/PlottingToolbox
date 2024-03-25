@@ -33,15 +33,18 @@ isRoot = false;
 
 mom = obj;
 idx = 0;
-H = eye(4);
+H_c2w = eye(4);
 while ~isRoot
     switch lower( get(mom,'Type') )
         case 'hgtransform'
-            % Compile transform
+            % Compile transforms
             idx = idx+1;
-            H_i2j{idx} = get(mom,'Matrix');
-            H_j2i{idx} = invSE(H_i2j{idx});
-            H = H_i2j{idx} * H;
+            % -> Child to parent
+            H_c2p{idx} = get(mom,'Matrix');
+            % -> Parent to child
+            H_p2c{idx} = invSE(H_c2p{idx});
+            % -> First child to world (axs)
+            H_c2w = H_c2p{idx} * H_c2w;
             familyTree(idx) = mom;
         case 'axes'
             isRoot = true;
@@ -62,8 +65,10 @@ end
 set(familyTree,'Parent',axs);
 
 %% Change family tree
-familyTree = fliplr(familyTree);
-for i = 1:(numel(familyTree)-1)
-    set(familyTree(i),'Parent',familyTree(i+1),'Matrix',H_j2i{i});
+% -> The new trunk of the family tree is familyTree(1)
+% -> The old trunk of the family tree is familyTree(n)
+n = numel(familyTree);
+for i = n:-1:2
+    set(familyTree(i),'Parent',familyTree(i-1),'Matrix',H_p2c{i});
 end
-set(familyTree(end),'Parent',axs,'Matrix',H);
+set(familyTree(1),'Parent',axs,'Matrix',H_c2w);
