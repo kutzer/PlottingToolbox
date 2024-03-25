@@ -1,25 +1,31 @@
-function obj = setParentTransform(obj)
+function familyTree = setParentTransform(obj,axs)
 % SETPARENTTRANSFORM changes the parent/child relationships and associated 
 % transformations to define a designated hgtransform object as the parent.
 %   setParentTransform(obj)
-%   obj = setParentTransform(___)
+%   setParentTransform(obj,mom)
+%   familyTree = setParentTransform(___)
 %
 %   Input(s)
 %       obj - hgtransform object
-%   
+%       axs - [OPTIONAL] parent for new parent transform
+%
 %   Output(s)
 %       obj - hgtransform object (same as input)
 %
 % M. Kutzer, 17Feb2016, USNA
 
 %% Check inputs
-narginchk(1,1);
+narginchk(1,2);
 if ~ishandle(obj)
     error('Specified input must be a valid graphics object handle.');
 end
 
 if ~matches(lower(get(obj,'Type')),'hgtransform')
     error('Input must be an hgtransform object');
+end
+
+if nargin < 2
+    axs = ancestor(obj,'Axes');
 end
 
 %% Define family tree and absolute transform
@@ -32,30 +38,32 @@ while ~isRoot
     switch lower( get(mom,'Type') )
         case 'hgtransform'
             % Compile transform
-            H = get(mom,'Matrix') * H;
             idx = idx+1;
+            H_i2j{idx} = get(mom,'Matrix');
+            H_j2i{idx} = invSE(H_i2j{idx});
+            H = H_i2j{idx} * H;
             familyTree(idx) = mom;
         case 'axes'
             isRoot = true;
-            return;
+            break;
         case 'figure'
             isRoot = true;
-            return
+            break
         case 'root'
             isRoot = true;
-            return;
+            break;
         otherwise
             % Keep working through the list family tree
     end
     mom = get(mom,'Parent');
 end
 
+%% Initialize common parent
+set(familyTree,'Parent',axs);
+
 %% Change family tree
 familyTree = fliplr(familyTree);
 for i = 1:(numel(familyTree)-1)
-    H_i2j = get(familyTree,'Matrix');
-    H_j2i = invSE(H_i2j);
-
-    set(familyTree(i),'Parent',familyTree(j),'Matrix',H_j2i);
+    set(familyTree(i),'Parent',familyTree(i+1),'Matrix',H_j2i{i});
 end
-set(familyTree(end),'Matrix',H);
+set(familyTree(end),'Parent',axs,'Matrix',H);
