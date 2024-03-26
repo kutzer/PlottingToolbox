@@ -15,7 +15,7 @@ function familyTree = setParentTransform(obj,axs)
 %
 % M. Kutzer, 26Mar2024, USNA
 
-debug = true;
+debug = false;
 
 %% Check inputs
 narginchk(1,2);
