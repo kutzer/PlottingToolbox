@@ -10,9 +10,12 @@ function familyTree = setParentTransform(obj,axs)
 %       axs - [OPTIONAL] parent for new parent transform
 %
 %   Output(s)
-%       obj - hgtransform object (same as input)
+%       familyTree - array of hgtransform objects starting with obj
+%           familyTree(1)
 %
-% M. Kutzer, 17Feb2016, USNA
+% M. Kutzer, 26Mar2024, USNA
+
+debug = true;
 
 %% Check inputs
 narginchk(1,2);
@@ -26,6 +29,17 @@ end
 
 if nargin < 2
     axs = ancestor(obj,'Axes');
+end
+
+%% Setup debug
+if debug
+    dAxs = ancestor(axs,'Axes');
+    XX(1,:) = xlim(dAxs);
+    XX(2,:) = ylim(dAxs);
+    XX(3,:) = zlim(dAxs);
+    
+    dX = diff(XX,1,2);
+    sc = (1/5)*min(dX);
 end
 
 %% Define family tree and absolute transform
@@ -46,6 +60,14 @@ while ~isRoot
             % -> First child to world (axs)
             H_c2w = H_c2p{idx} * H_c2w;
             familyTree(idx) = mom;
+            
+            if debug
+                h_c2p(idx) = triad('Parent',mom,'Matrix',eye(4),'Scale',sc,...
+                    'LineWidth',1.5,'AxisLabels',{...
+                    sprintf('x_{%d}',idx),...
+                    sprintf('y_{%d}',idx),...
+                    sprintf('z_{%d}',idx)});
+            end
         case 'axes'
             isRoot = true;
             break;
@@ -69,6 +91,6 @@ set(familyTree,'Parent',axs);
 % -> The old trunk of the family tree is familyTree(n)
 n = numel(familyTree);
 for i = n:-1:2
-    set(familyTree(i),'Parent',familyTree(i-1),'Matrix',H_p2c{i});
+    set(familyTree(i),'Parent',familyTree(i-1),'Matrix',H_p2c{i-1});
 end
 set(familyTree(1),'Parent',axs,'Matrix',H_c2w);
