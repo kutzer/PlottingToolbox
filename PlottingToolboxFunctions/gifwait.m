@@ -135,6 +135,8 @@ end
 
 % -------------------------------------------------------------------------
 function valOut = randiNew(valIn)
+% RANDINEW generates a pseudorandom number using rand and 'now' between 1
+% and the value specified in valIn
 
 % Generate scalar random number using rand.m
 rA = rand(1,1);
@@ -149,6 +151,6 @@ rB = seconds(dt)/60;
 r = mean([rA,rB]);
 
 % Define output
-valOut = round(valIn*r);
+valOut = round(valIn*(r-1))+1;
 
 end
