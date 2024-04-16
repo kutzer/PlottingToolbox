@@ -48,6 +48,7 @@ function g = gifwait(varargin)
 % Updates:
 %   01Apr2021 - Updated for new imread syntax (name/value pair)
 %   27Feb2024 - Updated to improve random selection of default gifs
+%   16Apr2024 - Updated randiNew to have a lower bound of 1
 
 %% Parse inputs
 narginchk(1,2)
