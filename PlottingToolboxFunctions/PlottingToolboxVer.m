@@ -40,9 +40,9 @@ function varargout = PlottingToolboxVer
 %   25Mar2024 - Added setParentTransform
 
 A.Name = 'Plotting Toolbox';
-A.Version = '1.1.8';
+A.Version = '1.1.9';
 A.Release = '(R2020b)';
-A.Date = '25-Mar-2024';
+A.Date = '16-Apr-2024';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);
