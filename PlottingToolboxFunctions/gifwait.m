@@ -152,6 +152,6 @@ rB = seconds(dt)/60;
 r = mean([rA,rB]);
 
 % Define output
-valOut = round(valIn*(r-1))+1;
+valOut = round((valIn-1)*r)+1;
 
 end
