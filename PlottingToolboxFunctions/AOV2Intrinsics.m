@@ -1,4 +1,4 @@
-function A_c2m = AOV2Intrinsics(varargin)
+function [A_c2m,z_mm] = AOV2Intrinsics(varargin)
 % AOV2INTRINSICS estimates the intrinsic matrix of a camera given the angle
 % of view and resolution for the camera and lens assembly.
 %   A_c2m = AOV2Intrinsics(hAOV,vAOV,res,sInfo)
@@ -22,9 +22,10 @@ function A_c2m = AOV2Intrinsics(varargin)
 %      A_m2c - 3x3 array defining the camera intrinsic matrix. The
 %              principal point is assumed to lie at the center of the
 %              image.
-%      H_c2s - 4x4 array defining the pose of the camera frame relative to
-%              to the "sensor frame" (located at the principal point of the
-%              imaging sensor).
+%       z_mm - scalar value defining defining the focal length. Assuming 
+%              a pinhole model, the focal length represents teh z-offset 
+%              from the principal point (in the center of the imaging 
+%              sensor) and the camera frame origin.
 %
 %   See also intrinsics2AOV plotCameraFOV
 %
