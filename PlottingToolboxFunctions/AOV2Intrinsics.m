@@ -30,7 +30,6 @@ function A_c2m = AOV2Intrinsics(varargin)
 %
 %   M. Kutzer, 23May2024, USNA
 
-debug = true;
 
 %% Check parse & input(s)
 narginchk(3,4)
