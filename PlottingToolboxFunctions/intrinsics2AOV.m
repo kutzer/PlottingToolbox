@@ -15,10 +15,12 @@ function varargout = intrinsics2AOV(varargin)
 %   view (hAOV), vertical angle of view (vAOV), and diagonal angle of view
 %   (dAOV) in degrees.
 %
+%   See also AOV2Intrinsics plotCameraFOV
+%
 %   M. Kutzer, USNA, 17Mar2020
 
 % Updates
-%   16Jun2020 - corrected horizontal & vertical AOV estiamtes.
+%   16Jun2020 - corrected horizontal & vertical AOV estimates.
 
 % TODO - accept cameraParams as an input instead of intrinsic matrix A_c2m
 
