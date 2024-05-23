@@ -3,6 +3,7 @@ function [A_c2m,z_mm] = AOV2Intrinsics(varargin)
 % of view and resolution for the camera and lens assembly.
 %   A_c2m = AOV2Intrinsics(hAOV,vAOV,res,sInfo)
 %   A_c2m = AOV2Intrinsics(dAOV,res,sInfo)
+%   [A_c2m,z_mm] = AOV2Intrinsics(___)
 %
 %   Input(s)
 %       hAOV - scalar value defining the horizontal angle of view in
