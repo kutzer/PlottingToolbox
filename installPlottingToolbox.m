@@ -138,9 +138,9 @@ end
 
 %% Migrate toolbox folder contents
 % Toolbox contents
-migrateContent(toolboxContent,toolboxPath,toolboxShort,toolboxName);
+migrateContent(toolboxContent,toolboxPath,toolboxName);
 % Example files
-migrateContent(toolboxExamples,toolboxPathExamples,toolboxShort,...
+migrateContent(toolboxExamples,toolboxPathExamples,...
     sprintf('%s Examples',toolboxName));
 
 %% Save toolbox path
@@ -166,47 +166,9 @@ fprintf('Rehashing Toolbox Cache...');
 rehash TOOLBOXCACHE
 fprintf('[Complete]\n');
 
-end
-
-%% Internal functions
-
+%% internal functions (shared workspace)
 % ------------------------------------------------------------------------
-function tfWrite = checkWriteAccess(pname)
-
-tmpFname = fullfile(pname,'tmp.txt');
-tmpHndle = fopen(tmpFname, 'w');
-if tmpHndle < 0
-    tfWrite = false;
-else
-    tfWrite = true;
-    fclose(tmpHndle);
-    delete(tmpFname);
-end
-
-end
-% ------------------------------------------------------------------------
-function removePath(toolboxName,pName,inPath,isPath,isDelete)
-% Remove path
-if inPath
-    rmpath(pName);
-end
-% Remove folder
-if isPath && isDelete
-    [isRemoved, msg, msgID] = rmdir(pName,'s');
-    if isRemoved
-        fprintf('Previous version of %s removed successfully:\n\t"%s"\n',toolboxName,pName);
-    else
-        fprintf('Failed to remove old %s folder:\n\t"%s"\n',toolboxName,pName);
-        %fprintf(adminSolution);
-        error(msgID,msg);
-    end
-elseif ~isDelete
-    fprintf('Skipping removal of old %s folder:\n\t"%s"\n',toolboxName,pName);
-end
-
-end
-% ------------------------------------------------------------------------
-function migrateContent(sourceIn,destination,toolboxShort,msg)
+function migrateContent(sourceIn,destination,msg)
 
 % Migrate toolbox folder contents
 if ~isfolder(sourceIn)
@@ -290,5 +252,45 @@ for i = 1:n
 end
 set(wb,'Visible','off');
 delete(wb);
+
+end
+
+end
+
+%% Internal functions (unique workspace)
+
+% ------------------------------------------------------------------------
+function tfWrite = checkWriteAccess(pname)
+
+tmpFname = fullfile(pname,'tmp.txt');
+tmpHndle = fopen(tmpFname, 'w');
+if tmpHndle < 0
+    tfWrite = false;
+else
+    tfWrite = true;
+    fclose(tmpHndle);
+    delete(tmpFname);
+end
+
+end
+% ------------------------------------------------------------------------
+function removePath(toolboxName,pName,inPath,isPath,isDelete)
+% Remove path
+if inPath
+    rmpath(pName);
+end
+% Remove folder
+if isPath && isDelete
+    [isRemoved, msg, msgID] = rmdir(pName,'s');
+    if isRemoved
+        fprintf('Previous version of %s removed successfully:\n\t"%s"\n',toolboxName,pName);
+    else
+        fprintf('Failed to remove old %s folder:\n\t"%s"\n',toolboxName,pName);
+        %fprintf(adminSolution);
+        error(msgID,msg);
+    end
+elseif ~isDelete
+    fprintf('Skipping removal of old %s folder:\n\t"%s"\n',toolboxName,pName);
+end
 
 end
