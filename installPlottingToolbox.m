@@ -264,7 +264,6 @@ end
 end
 
 %% Internal functions (unique workspace)
-
 % ------------------------------------------------------------------------
 function tfWrite = checkWriteAccess(pname)
 
