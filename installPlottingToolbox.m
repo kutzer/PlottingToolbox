@@ -136,18 +136,10 @@ if isToolbox
     end
 end
 
-%% Create Toolbox Path
-[isDir,msg,msgID] = mkdir(toolboxPath);
-if isDir
-    fprintf('%s folder created successfully:\n\t"%s"\n',toolboxName,toolboxPath);
-else
-    fprintf('Failed to create %s folder:\n\t"%s"\n',toolboxName,toolboxPath);
-    fprintf(adminSolution);
-    error(msgID,msg);
-end
-
 %% Migrate toolbox folder contents
+% Toolbox contents
 migrateContent(toolboxContent,toolboxPath,toolboxShort,toolboxName);
+% Example files
 migrateContent(toolboxExamples,toolboxPathExamples,toolboxShort,...
     sprintf('%s Examples',toolboxName));
 
@@ -231,6 +223,18 @@ if ~isfolder(sourceIn)
          '\t(4) Enter "install%s" (without quotes) into the command window\n',...
          '\t(5) Press Enter.'],toolboxShort,toolboxShort,toolboxShort,toolboxShort));
 end
+
+% Create Toolbox Path
+[isDir,msg,msgID] = mkdir(destination);
+if isDir
+    fprintf('%s folder created successfully:\n\t"%s"\n',msg,destination);
+else
+    fprintf('Failed to create %s folder:\n\t"%s"\n',msg,destination);
+    fprintf(adminSolution);
+    error(msgID,msg);
+end
+
+% Migrate contents
 files = dir(sourceIn);
 wb = waitbar(0,sprintf('Copying %s contents...',msg));
 n = numel(files);
