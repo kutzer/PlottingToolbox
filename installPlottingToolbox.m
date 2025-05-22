@@ -149,7 +149,7 @@ end
 %% Migrate toolbox folder contents
 migrateContent(toolboxContent,toolboxPath,toolboxShort,toolboxName);
 migrateContent(toolboxExamples,toolboxPathExamples,toolboxShort,...
-    sprintf('%s Examples'));
+    sprintf('%s Examples',toolboxName));
 
 %% Save toolbox path
 %addpath(genpath(toolboxRoot),'-end');
