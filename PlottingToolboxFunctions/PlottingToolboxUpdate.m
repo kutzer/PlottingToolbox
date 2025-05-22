@@ -8,6 +8,7 @@ function PlottingToolboxUpdate
 %               installations
 %   15Mar2018 - Updated to include msgbox warning when download fails
 %   08Jan2021 - Updated ToolboxUpdate
+%   22May2025 - Updated to enable local install
 
 % TODO - Find a location for "PlottingToolbox Example SCRIPTS"
 % TODO - update function for general operation
@@ -91,8 +92,13 @@ pname_star = fnames{cIdx}(1:sIdx-1);
 cpath = cd;
 cd(pname_star);
 
+%% Check for admin
+skipAdmin = ~checkWriteAccess(matlabroot);
+
 %% Install Toolbox
-installToolbox(true);
+% TODO - consider providing the user with an option or more information
+%        related to "skipAdmin"
+installToolbox(true,skipAdmin);
 
 %% Move back to current directory and remove temp file
 cd(cpath);
@@ -103,5 +109,20 @@ end
 
 %% Complete installation
 fprintf('Installation complete.\n');
+
+end
+
+% -------------------------------------------------------------------------
+function tfWrite = checkWriteAccess(pname)
+
+tmpFname = fullfile(pname,'tmp.txt');
+tmpHndle = fopen(tmpFname, 'w');
+if tmpHndle < 0
+    tfWrite = false;
+else
+    tfWrite = true;
+    fclose(tmpHndle);
+    delete(tmpFname);
+end
 
 end
