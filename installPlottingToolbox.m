@@ -41,7 +41,7 @@ allPaths = strsplit(allPaths,pathsep);
 
 inPathAdmin = any(matches(allPaths,toolboxPathAdmin),'all');
 inPathLocal = any(matches(allPaths,toolboxPathLocal),'all');
-%inPathExamples = any(matches(allPaths,toolboxPathExamples),'all');
+inPathExamples = any(matches(allPaths,toolboxPathExamples),'all');
 
 %% Check inputs
 if nargin < 1
@@ -125,6 +125,8 @@ if isToolbox
                 toolboxPathAdmin,inPathAdmin,isPathAdmin,isAdmin);
             removePath(toolboxName,...
                 toolboxPathLocal,inPathLocal,isPathLocal,isLocal);
+            removePath(toolboxName,...
+                toolboxPathExamples,inPathExamples,inPathExamples,isExample);
         case 'No'
             fprintf('%s currently exists, installation cancelled.\n',toolboxName);
             return
