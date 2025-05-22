@@ -189,13 +189,13 @@ if ~isfolder(sourceIn)
 end
 
 % Create Toolbox Path
-[isDir,msg,msgID] = mkdir(destination);
+[isDir,msgDir,msgID] = mkdir(destination);
 if isDir
     fprintf('%s folder created successfully:\n\t"%s"\n',msg,destination);
 else
     fprintf('Failed to create %s folder:\n\t"%s"\n',msg,destination);
     fprintf(adminSolution);
-    error(msgID,msg);
+    error(msgID,msgDir);
 end
 
 % Migrate contents
