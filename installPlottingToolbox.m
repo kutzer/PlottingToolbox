@@ -142,8 +142,12 @@ end
 % Toolbox contents
 migrateContent(toolboxContent,toolboxPath,toolboxName);
 % Example files
+try
 migrateContent(toolboxExamples,toolboxPathExamples,...
     sprintf('%s Examples',toolboxName));
+catch
+    fprintf('Unable to migrate examples.');
+end
 
 %% Save toolbox path
 %addpath(genpath(toolboxRoot),'-end');
