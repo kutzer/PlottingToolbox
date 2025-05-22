@@ -18,13 +18,15 @@ ToolboxUpdate('Plotting');
 
 end
 
+%% Internal functions (unique workspace)
+% ------------------------------------------------------------------------
 function ToolboxUpdate(toolboxName)
 
-%% Setup functions
+% Setup functions
 ToolboxVer = str2func( sprintf('%sToolboxVer',toolboxName) );
 installToolbox = str2func( sprintf('install%sToolbox',toolboxName) );
 
-%% Check current version
+% Check current version
 try
     A = ToolboxVer;
 catch ME
@@ -32,7 +34,7 @@ catch ME
     fprintf('No previous version of %s detected.\n',toolboxName);
 end
 
-%% Setup temporary file directory
+% Setup temporary file directory
 fprintf('Downloading the %s Toolbox...',toolboxName);
 tmpFolder = sprintf('%sToolbox',toolboxName);
 pname = fullfile(tempdir,tmpFolder);
@@ -43,7 +45,7 @@ end
 % Create new directory
 [ok,msg] = mkdir(tempdir,tmpFolder);
 
-%% Download and unzip toolbox (GitHub)
+% Download and unzip toolbox (GitHub)
 url = sprintf('https://github.com/kutzer/%sToolbox/archive/master.zip',toolboxName);
 try
     %fnames = unzip(url,pname);
@@ -61,7 +63,7 @@ catch ME
     fprintf(2,'ERROR MESSAGE:\n\t%s\n',ME.message);
 end
 
-%% Check for successful download
+% Check for successful download
 alternativeInstallMsg = [...
     sprintf('Manually download the %s Toolbox using the following link:\n',toolboxName),...
     newline,...
@@ -81,37 +83,36 @@ if ~confirm
     return
 end
 
-%% Find base directory
+% Find base directory
 install_pos = strfind(fnames, sprintf('install%sToolbox.m',toolboxName) );
 sIdx = cell2mat( install_pos );
 cIdx = ~cell2mat( cellfun(@isempty,install_pos,'UniformOutput',0) );
 
 pname_star = fnames{cIdx}(1:sIdx-1);
 
-%% Get current directory and temporarily change path
+% Get current directory and temporarily change path
 cpath = cd;
 cd(pname_star);
 
-%% Check for admin
+% Check for admin
 skipAdmin = ~checkWriteAccess(matlabroot);
 
-%% Install Toolbox
+% Install Toolbox
 % TODO - consider providing the user with an option or more information
 %        related to "skipAdmin"
 installToolbox(true,skipAdmin);
 
-%% Move back to current directory and remove temp file
+% Move back to current directory and remove temp file
 cd(cpath);
 [ok,msg] = rmdir(pname,'s');
 if ~ok
     warning('Unable to remove temporary download folder. %s',msg);
 end
 
-%% Complete installation
+% Complete installation
 fprintf('Installation complete.\n');
 
 end
-
 % -------------------------------------------------------------------------
 function tfWrite = checkWriteAccess(pname)
 
