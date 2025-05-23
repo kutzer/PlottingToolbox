@@ -100,7 +100,12 @@ skipAdmin = ~checkWriteAccess(matlabroot);
 % Install Toolbox
 % TODO - consider providing the user with an option or more information
 %        related to "skipAdmin"
-installToolbox(true,skipAdmin);
+try
+    installToolbox(true,skipAdmin);
+catch ME
+    cd(cpath);
+    throw(ME);
+end
 
 % Move back to current directory and remove temp file
 cd(cpath);
