@@ -17,7 +17,6 @@ function installPlottingToolbox(replaceExisting,skipAdmin)
 % Updates
 %   22May2025 - Enable local user installation
 
-
 %% Assign tool/toolbox specific parameters
 dirName = 'plotting';
 toolboxContent  = 'PlottingToolboxFunctions';
