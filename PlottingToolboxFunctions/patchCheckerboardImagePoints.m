@@ -1,4 +1,4 @@
-function ptc = patchCheckerboardImagePoints(imagePoints,boardSize)
+function ptc = patchCheckerboardImagePoints(imagePoints,boardSize,method)
 % PATCHCHECKERBOARDIMAGEPOINTS creates patch structure representing an
 % approximate (xxx interpolated) representation of a checkerboard
 % fiducial.
