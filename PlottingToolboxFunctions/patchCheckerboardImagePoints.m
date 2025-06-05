@@ -76,7 +76,7 @@ for i = 1:k
         % Fit function for interpolation
         fX = fcnFit(s(tfIsFinite),X(i,tfIsFinite,j));
         % Interpolate
-        XX(i,:,j) = fcnEval(fX,ss);
+        XX(i+1,:,j) = fcnEval(fX,ss);
     end
 end
 
