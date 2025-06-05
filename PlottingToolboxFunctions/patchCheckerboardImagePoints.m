@@ -50,7 +50,7 @@ switch lower(method)
         str = 'order';
         nOrder = [];
         if numel(method) >= numel(str)+4
-            if contains(method,order)
+            if contains(method,str)
                 nOrder = str2double( method(1:end-(numel(str)+3)) );
             end
         end
