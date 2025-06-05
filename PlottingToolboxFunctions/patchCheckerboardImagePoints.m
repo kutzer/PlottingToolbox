@@ -141,7 +141,7 @@ XX = (XXc + XXr)./2;
 %% Define faces
 faces = [];
 isBlack = logical([]);
-tf = true;
+tf = false;
 for i = 1:m
     for j = 1:n
         faces(end+1,:) = [ii(i,j),ii(i,j+1),ii(i+1,j+1),ii(i+1,j)];
