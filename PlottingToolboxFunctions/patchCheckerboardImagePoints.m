@@ -23,7 +23,6 @@ function ptc = patchCheckerboardImagePoints(imagePoints,boardSize)
 %% Check input(s)
 narginchk(2,2);
 
-%%
 N = size(imagePoints,1);
 if numel(boardSize) ~= 2
     error('The board size must be defined as a 1x2 array.');
@@ -77,7 +76,7 @@ end
 
 %% Define faces
 faces = [];
-isBlack = [];
+isBlack = logical([]);
 tf = false;
 for i = 1:m
     for j = 1:n
