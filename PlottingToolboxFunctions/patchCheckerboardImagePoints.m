@@ -50,7 +50,7 @@ switch lower(method)
         str = 'order';
         nOrder = [];
         if numel(method) >= numel(str)+4
-            if contains(method,str)
+            if contains(lower(method),str)
                 nOrder = str2double( method(1:end-(numel(str)+3)) );
             end
         end
@@ -62,6 +62,7 @@ switch lower(method)
         fcnFit = @(in1,in2)polyfit(in1,in2,nOrder);
         fcnEval = @polyval;
 end
+
 %% Reshape image points
 for i = 1:size(imagePoints,2)
     X(:,:,i) = reshape(imagePoints(:,i),m-1,n-1);
