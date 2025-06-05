@@ -35,6 +35,12 @@ if N ~= (m-1)*(n-1)
     error('Image points do not match specified board size');
 end
 
+%% Define fit
+%fcnFit = @spline;
+%fcnEval = @ppval;
+fcnFit = @(in1,in2)polyfit(in1,in2,1);
+fcnEval = @polyval;
+
 %% Reshape image points
 for i = 1:size(imagePoints,2)
     X(:,:,i) = reshape(imagePoints(:,i),m-1,n-1);
@@ -53,26 +59,62 @@ for i = 1:k
         % Identify finite points
         tfIsFinite = isfinite(X(:,i,j));
         % Fit function for interpolation
-        fX = spline(s(tfIsFinite),X(tfIsFinite,i,j));
+        fX = fcnFit(s(tfIsFinite),X(tfIsFinite,i,j));
         % Interpolate
-        XX(:,i+1,j) = ppval(fX,ss);
+        XX(:,i+1,j) = fcnEval(fX,ss);
     end
 end
 
 %% Interpolate rows
-k = m+1;
+k = m-1;
 for i = 1:k
     s = (1:(n-1))+1;
     ss = 1:(n+1);
     for j = 1:size(XX,3)
         % Identify finite points
-        tfIsFinite = isfinite(XX(i,s,j));
+        tfIsFinite = isfinite(X(i,:,j));
         % Fit function for interpolation
-        fX = spline(s(tfIsFinite),XX(i,s(tfIsFinite),j));
+        fX = fcnFit(s(tfIsFinite),X(i,tfIsFinite,j));
         % Interpolate
-        XX(i,:,j) = ppval(fX,ss);
+        XX(i,:,j) = fcnEval(fX,ss);
     end
 end
+
+%% Interpolate corners
+% Column
+XXc = XX;
+k = n+1;
+for i = [1,k]
+    s = (1:(m-1))+1;
+    ss = 1:(m+1);
+    for j = 1:size(XXc,3)
+        % Identify finite points
+        tfIsFinite = isfinite(XXc(s,i,j));
+        % Fit function for interpolation
+        fX = fcnFit(s(tfIsFinite),XXc(s(tfIsFinite),i,j));
+        % Interpolate
+        XXc(:,i,j) = fcnEval(fX,ss);
+    end
+end
+
+% Row
+XXr = XX;
+k = m+1;
+for i = [1,k]
+    s = (1:(n-1))+1;
+    ss = 1:(n+1);
+    for j = 1:size(XXr,3)
+        % Identify finite points
+        tfIsFinite = isfinite(XXr(i,s,j));
+        % Fit function for interpolation
+        fX = fcnFit(s(tfIsFinite),XXr(i,s(tfIsFinite),j));
+        % Interpolate
+        XXr(i,:,j) = fcnEval(fX,ss);
+    end
+end
+
+% Average results
+XX = (XXc + XXr)./2;
 
 %% Define faces
 faces = [];
