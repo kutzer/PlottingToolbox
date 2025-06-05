@@ -9,6 +9,8 @@ function ptc = patchCheckerboardImagePoints(imagePoints,boardSize)
 %       imagePoints - Nx2 array defining image points associated with a
 %                     checkerboard fiducial
 %         boardSize - 1x2 array defining checkerboard size
+%            method - character array specifying interpolation method
+%               {['Spline'],'1st Order','2nd Order',...}
 %
 %   Output(s)
 %       ptc - 2-element structured array containing fields for a patch
@@ -21,7 +23,7 @@ function ptc = patchCheckerboardImagePoints(imagePoints,boardSize)
 %   M. Kutzer, 04Jun2025, USNA
 
 %% Check input(s)
-narginchk(2,2);
+narginchk(2,3);
 
 N = size(imagePoints,1);
 if numel(boardSize) ~= 2
@@ -35,12 +37,31 @@ if N ~= (m-1)*(n-1)
     error('Image points do not match specified board size');
 end
 
-%% Define fit
-%fcnFit = @spline;
-%fcnEval = @ppval;
-fcnFit = @(in1,in2)polyfit(in1,in2,1);
-fcnEval = @polyval;
+if nargin < 3
+    method = 'Spline';
+end
 
+%% Define fit
+switch lower(method)
+    case 'spline'
+        fcnFit = @spline;
+        fcnEval = @ppval;
+    otherwise
+        str = 'order';
+        nOrder = [];
+        if numel(method) >= numel(str)+4
+            if contains(method,order)
+                nOrder = str2double( method(1:end-(numel(str)+3)) );
+            end
+        end
+
+        if isempty(nOrder)
+            error('Unknown interpolation method "%s"',method);
+        end
+
+        fcnFit = @(in1,in2)polyfit(in1,in2,nOrder);
+        fcnEval = @polyval;
+end
 %% Reshape image points
 for i = 1:size(imagePoints,2)
     X(:,:,i) = reshape(imagePoints(:,i),m-1,n-1);
