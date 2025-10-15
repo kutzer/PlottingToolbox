@@ -44,6 +44,7 @@ function varargout = projectWithFalseDepth(p_f,P_f2m,varargin)
 % Update(s)
 %   06Feb2024 - Updated to parse and check inputs
 %   05Mar2024 - Updated to speed up projection of points
+%   15Oct2025 - Error correction for projecting patch information
 
 %% Parse input(s)
 narginchk(2,3);
@@ -154,7 +155,7 @@ if tfPatch
     % Account for common false depth
     maxTilde_z_m = max( maxTilde_z_m );
     for i = 1:numel(ptc_m)
-        ptc_m(i).Vertices = ptc_m(i).Vertices + maxTilde_z_m;
+        ptc_m(i).Vertices(:,3) = ptc_m(i).Vertices(:,3) + maxTilde_z_m;
     end
     
     % Package output(s)
