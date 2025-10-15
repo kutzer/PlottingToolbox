@@ -45,6 +45,7 @@ function varargout = projectWithFalseDepth(p_f,P_f2m,varargin)
 %   06Feb2024 - Updated to parse and check inputs
 %   05Mar2024 - Updated to speed up projection of points
 %   15Oct2025 - Error correction for projecting patch information
+%   15Oct2025 - Force "nan" for points behind the image
 
 %% Parse input(s)
 narginchk(2,3);
@@ -200,4 +201,8 @@ function [p_m,tilde_p_m,maxTilde_z_m] = projPnts(p_f,P_f2m)
     p_m = tilde_p_m./tilde_p_m(3,:);
     
     maxTilde_z_m = max(tilde_p_m(3,:));
+
+    tfBehind = tilde_p_m(3,:) < 0;
+    p_m(:,tfBehind) = nan;
+    tilde_p_m(:,tfBehind) = nan;
 end
